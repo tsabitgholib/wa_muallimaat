@@ -1,0 +1,428 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Utilitas;
+
+use App\Http\Controllers\Controller;
+use App\Models\master_data\mst_kelas;
+use App\Models\master_data\mst_post;
+use App\Models\master_data\mst_siswa;
+use App\Models\master_data\mst_thn_aka;
+use App\Models\MstKelasModel;
+use App\Models\MstThnAkaModel;
+use App\Models\no;
+use App\Models\scctbill;
+use App\Models\ScctBillDetailModel;
+use App\Models\ScctBillModel;
+use App\Models\UAkunModel;
+use App\Models\ValidationMessage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Termwind\Components\Dd;
+
+use function Laravel\Prompts\select;
+
+class NotifikasiWhatsappTunggakanController extends Controller
+{
+
+    public $mainTitle;
+
+    public function __construct()
+    {
+        $this->title = 'Keuangan';
+        $this->mainTitle = 'TunggakanTagihan Siswa';
+        $this->dataTitle = 'Data TunggakanTagihan';
+        $this->showTitle = 'Detail Data Tunggakan Tagihan';
+    }
+
+    public function getColumn()
+    {
+        return [
+            ['data' => 'no', 'name' => 'no'],
+            ['data' => 'nis', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
+            ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
+            ['data' => 'nowa', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
+            ['data' => 'PAIDST', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Dibayar', 'falseVal' => 'Belum Dibayar'],
+            ['data' => 'FIDBANK', 'name' => 'Metode', 'columnType' => 'custom_code_tagihan', 'searchable' => true, 'orderable' => true],
+            ['data' => 'BTA', 'name' => 'Tahun AKA', 'searchable' => true, 'orderable' => true],
+
+            // ['data' => 'nama_post', 'name' => 'Nama POST', 'searchable' => true, 'orderable' => true],
+            ['data' => 'BILLNM', 'name' => 'Nama Tagihan', 'searchable' => true, 'orderable' => true],
+            ['data' => 'BILLAM', 'name' => 'Tagihan', 'searchable' => true, 'orderable' => true, 'columnType' => 'currency', 'className' => 'text-end'],
+            ['data' => 'FUrutan', 'name' => 'Urutan', 'searchable' => true, 'orderable' => true],
+        ];
+    }
+
+    public function getKelas(Request $request)
+    {
+        $jenjang = $request->input('jenjang');
+        $unit = $request->input('unit');
+
+        $kelas = MstKelasModel::where('jenjang', $jenjang)
+            ->where('unit', $unit)
+            ->get();
+        return response()->json($kelas);
+    }
+
+    public function getData(Request $request)
+    {
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length");
+
+        $columnName_arr = $request->get('columns');
+        $search_arr = $request->get('search');
+
+        $defaultColumn = 'scctbill.AA';
+        $defaultOrder = 'desc';
+
+        if ($request->has('order')) {
+            $columnIndex_arr = $request->get('order');
+            $columnIndex = $columnIndex_arr[0]['column'];
+            $columnSortOrder = $columnIndex_arr[0]['dir'];
+        } else {
+            $columnIndex = $defaultColumn;
+            $columnSortOrder = $defaultOrder;
+        }
+
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $searchValue = $search_arr['value'];
+
+        if (!$columnName || $columnName == 'no') {
+            $columnName = $defaultColumn;
+            $columnSortOrder = $defaultOrder;
+        }
+
+        $filters = [];
+        $filterQuery = null;
+
+        $filter = $request->input('filter');
+
+        if ($request->status_tagihan == 1) {
+            $groupBy = 'scctbill.AA';
+        } else {
+            $groupBy = 'scctcust.NOCUST';
+            $defaultColumn = 'scctbill.FUrutan';
+            $defaultOrder = 'asc';
+        }
+        if ($filter) {
+            // dd($filter);
+            foreach ($filter as $key => $val) {
+                if (strtolower($val) != 'all' && $val !== null && $val !== '') {
+                    $colName = match ($key) {
+                        'tahun_akademik' => 'scctbill.BTA',
+                        'cari_siswa' => is_numeric($val) ? 'scctcust.NOCUST' : 'scctcust.NMCUST',
+                        default => null
+                    };
+
+                    ($colName) && $filters[] =  $colName == 'scctcust.NMCUST' || 'mst_siswas.nis' ?  [$colName, 'LIKE', "%" . $val . "%"] : [$colName, '=', $val];
+                }
+            };
+        }
+        if (isset($request->unit)) {
+            $waduh = explode('-', $request->unit);
+            $jenjang = $waduh[0];
+            $unit = $waduh[1];
+            $kelas = $request->kelas;
+            $filters[] = ['scctcust.DESC02', '=', $jenjang];
+            $filters[] = ['scctcust.CODE02', '=', $unit];
+            $filters[] = ['scctcust.DESC03', '=', $kelas];
+        }
+
+        $tahun = Carbon::now()->year;
+        $bulan = Carbon::now()->format('m');
+        $filters[] = ['scctbill.BILLAC', '<', '' . $tahun . $bulan];
+        if (!empty($filters)) {
+            $filterQuery = function ($query) use ($filters) {
+                foreach ($filters as $filter) {
+                    if (count($filter) === 3) {
+                        $query->where($filter[0], $filter[1], $filter[2]);
+                    } elseif (count($filter) === 4) {
+                        $query->{$filter[3]}($filter[0], $filter[1], $filter[2]);
+                    }
+                }
+            };
+        }
+
+        $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
+            ->where('scctbill.BILLAC', '<', '' . $tahun . $bulan)
+            ->count();
+
+        $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
+            ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+            ->where('scctbill.PAIDST', 0)
+            ->whereAny([
+                'scctcust.NMCUST',
+                'scctcust.NOCUST',
+                'scctcust.DESC02',
+                'scctcust.DESC03',
+                'scctcust.CODE02',
+                'scctcust.nowa'
+            ], 'like', '%' . $searchValue . '%')
+            ->where(function ($query) use ($filterQuery) {
+                if ($filterQuery) {
+                    $filterQuery($query);
+                }
+            })
+            ->count();
+
+        $records =
+            ScctBillModel::orderBy($columnName, $columnSortOrder)
+            ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+            ->where('scctbill.PAIDST', 0)
+            ->select([
+                'scctbill.AA',
+                'scctbill.BILLNM',
+                'scctbill.BILLAM',
+                'scctbill.PAIDST',
+                'scctbill.BTA',
+                'scctbill.FIDBANK',
+                'scctbill.FUrutan',
+                // 'scctbill.KodePost',
+                'scctcust.NMCUST AS nama',
+                'scctcust.NOCUST AS nis',
+                'scctcust.nowa'
+            ])
+            ->whereAny([
+                'scctcust.NMCUST',
+                'scctcust.NOCUST',
+            ], 'like', '%' . $searchValue . '%')
+            ->where(function ($query) use ($filterQuery) {
+                if ($filterQuery) {
+                    $filterQuery($query);
+                }
+            })
+            ->groupBy($groupBy)
+            ->skip($start)
+            ->take($rowperpage)
+            ->get()
+            ->map(function ($item, $index) {
+                $item->no = $index + 1;
+                $item->item_id = Crypt::encrypt($item->id);
+                unset($item->id);
+                return $item;
+            })->toArray();
+
+        $response = array(
+            "draw" => intval($draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $totalRecordswithFilter,
+            "data" => $records,
+        );
+        return response()->json($response);
+    }
+
+    public function index()
+    {
+        $post = UAkunModel::all();
+        $thn_aka = MstThnAkaModel::where('thn_aka', '!=', null)->orderBy('thn_aka', 'desc')->get();
+        // $kelas = MstKelasModel::get();
+
+        $kelas = MstKelasModel::select('jenjang', 'unit')
+            ->distinct()
+            ->orderBy('unit')
+            ->get();
+
+        $data['post'] = $post;
+        $data['thn_aka'] = $thn_aka;
+        $data['kelas'] = $kelas;
+        $data['title'] = $this->title;
+        $data['mainTitle'] = $this->mainTitle;
+        $data['dataTitle'] = $this->dataTitle;
+        $data['showTitle'] = $this->showTitle;
+        $data['columnsUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-column');
+        $data['datasUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-data');
+        // $data['modalLink'] = view('admin.utilitas.notifikasi_whatsapp_tagihan.modal', compact('post'));
+
+        return view('admin.utilitas.notifikasi_whatsapp_tunggakan.index', $data);
+    }
+
+    public function sendWhatsapp(Request $request)
+    {
+        // dd($request);
+        set_time_limit(300);
+        $filters = [];
+        $filterQuery = null;
+        // $search_arr = $request->get('search');
+        // $searchValue = $search_arr['value'];
+        $filter = $request->input('filter');
+
+        if ($filter) {
+            // dd($filter);
+            foreach ($filter as $key => $val) {
+                if (strtolower($val) != 'all' && $val !== null && $val !== '') {
+                    $colName = match ($key) {
+                        'tahun_akademik' => 'scctbill.BTA',
+                        'cari_siswa' => is_numeric($val) ? 'scctcust.NOCUST' : 'scctcust.NMCUST',
+                        default => null
+                    };
+
+                    ($colName) && $filters[] =  $colName == 'scctcust.NMCUST' || 'mst_siswas.nis' ?  [$colName, 'LIKE', "%" . $val . "%"] : [$colName, '=', $val];
+                }
+            };
+        }
+        if (isset($request->unit)) {
+            $waduh = explode('-', $request->unit);
+            $jenjang = $waduh[0];
+            $unit = $waduh[1];
+            $kelas = $request->kelas;
+            $filters[] = ['scctcust.DESC02', '=', $jenjang];
+            $filters[] = ['scctcust.CODE02', '=', $unit];
+            $filters[] = ['scctcust.DESC03', '=', $kelas];
+        }
+        $tahun = Carbon::now()->year;
+        $bulan = Carbon::now()->format('m');
+        $filters[] = ['scctbill.BILLAC', '<', '' . $tahun . $bulan];
+
+        if (!empty($filters)) {
+            $filterQuery = function ($query) use ($filters) {
+                foreach ($filters as $filter) {
+                    if (count($filter) === 3) {
+                        $query->where($filter[0], $filter[1], $filter[2]);
+                    } elseif (count($filter) === 4) {
+                        $query->{$filter[3]}($filter[0], $filter[1], $filter[2]);
+                    }
+                }
+            };
+        }
+
+
+        if ($request->status_tagihan == 1) {
+            $records = ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+                ->where('scctbill.PAIDST', 0)
+                ->whereNotNull('scctcust.nowa')
+                ->select([
+                    'scctbill.AA',
+                    'scctbill.BILLNM',
+                    // 'scctbill.BILLAM',
+                    DB::raw('SUM(scctbill.BILLAM) as BILLAM'),
+                    'scctbill.PAIDST',
+                    'scctbill.BTA',
+                    'scctbill.FIDBANK',
+                    'scctbill.FUrutan',
+                    'scctcust.NMCUST',
+                    'scctcust.NOCUST',
+                    'scctcust.CUSTID',
+                    'scctcust.nowa',
+                ])
+                ->where(function ($query) use ($filterQuery) {
+                    if ($filterQuery) {
+                        $filterQuery($query);
+                    }
+                })
+                ->groupBy('scctcust.CUSTID')
+                ->get();
+            if ($records->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
+        } else {
+            $records =
+                ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+                ->where('scctbill.PAIDST', 0)
+                ->whereNotNull('scctcust.nowa')
+                ->select([
+                    'scctbill.AA',
+                    'scctbill.BILLNM',
+                    'scctbill.BILLAM',
+                    'scctbill.PAIDST',
+                    'scctbill.BTA',
+                    'scctbill.FIDBANK',
+                    'scctbill.FUrutan',
+                    'scctcust.NMCUST',
+                    'scctcust.NOCUST',
+                    'scctcust.nowa',
+                    'scctcust.CUSTID',
+                ])
+                ->where(function ($query) use ($filterQuery) {
+                    if ($filterQuery) {
+                        $filterQuery($query);
+                    }
+                })
+                ->groupBy('scctbill.CUSTID')
+                ->orderBy('scctbill.FUrutan', 'desc')
+                ->get();
+            if ($records->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
+        };
+        $payload = [
+            "api_key" => "1FOPYD2SA8VPIU4Q",
+            "number_key" => "3eF1CHDzjLi35eE2",
+        ];
+
+        $url = 'https://api.watzap.id/v1/send_message';
+        foreach ($records as $siswa) {
+            try {
+                $messages = [
+                    "Assalamualaikum Wr Wb,
+                    \nSalam sejahtera bagi kita semua. Kami ingin menginformasikan kepada Anda, orang tua ananda {nama_anak}, untuk tunggakan tagihan anak Anda sebesar {jumlah_tagihan}.
+                    \nDengan Rincian :{rincian}\nDemikian pesan dari kami. Wassalam 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                    "Selamat pagi/siang/malam,Bapak/Ibu {nama_orang_tua}. Kami ingin mengingatkan bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah jatuh tempo.
+                    \nRincian Tagihan :{rincian}\nTerima kasih atas perhatiannya. Salam hormat dari kami 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                    " *_*Friendly Rimender From " . config('app.nama_instansi') . "_*\n\nPermisi Bapak/Ibu {nama_orang_tua}, berikut ini merupakan pesan pengingat untuk tunggakan tagihan sekolah yang dimiliki ananda {nama_anak} yang berjumlah {jumlah_tagihan}.
+                    \nDengan Rincian Tagihannya :{rincian}\nKami harap Bapak/Ibu dapat segera melunaskan beban tagihan tersebut. Terimakasih Wassalamualaikum wr wb 🙏.\n\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                    "Dengan hormat, kami sampaikan kepada Bapak/Ibu {nama_orang_tua}, bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah harus dibayarkan.
+                    \nRincian :{rincian}\nTerima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.\n\n*_pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*"
+                ];
+                $randomArray = Arr::random($messages);
+
+                if ($request->status_tagihan == 1) {
+                    $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
+                        ->where('BILLAC', '<', '' . $tahun . $bulan)
+                        ->where('PAIDST', 0)
+                        ->get();
+                } else {
+                    $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
+                        ->where('PAIDST', 0)
+                        ->where('BILLAC', '<', '' . $tahun . $bulan)
+                        ->groupBy('scctbill.CUSTID')
+                        ->orderBy('scctbill.FUrutan', 'desc')
+                        ->get();
+                }
+                $rincianString = "\n";
+                foreach ($rincian as $item) {
+                    $rincianString .= "- " . $item->BILLNM . ": Rp *" . number_format($item->BILLAM, 0, ',', '.') . "*\n";
+                }
+                $jumlah_tagihan = 'Rp *' . number_format((int)$siswa->BILLAM, 0, ',', '.') . '*';
+                $message = str_replace(
+                    ['{nama_anak}', '{nama_orang_tua}', '{jumlah_tagihan}', '{rincian}'],
+                    [$siswa->NMCUST ?? '', $siswa->GENUS, $jumlah_tagihan, $rincianString],
+                    $randomArray
+                );
+
+                $payload['phone_no'] = $siswa->nowa;
+                $payload['message'] = $message;
+
+                // $payload['target'] = $siswa->custid;
+                // $payload['description'] = $message;
+
+                $jsonPayload = json_encode($payload);
+                // dd($jsonPayload);
+
+                $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+                Log::error('Wa Response: ' . $response);
+
+                $randomDelay = rand(1100000, 3200000);
+                usleep($randomDelay);
+            } catch (Exception $e) {
+
+                Log::channel('whatsapp')->error('Payment failed', [
+                    'error' => $e->getMessage(),
+                    'NOREFF' => "error"
+                ]);
+                return response()->json(['error' => true, 'message' => $e->getMessage()], 500);
+            }
+            //untuk mengecek sesuai furutan atau tidak
+
+        }
+
+        return response()->json(['message' => 'Pesan Whatsapp telah dikirimkan!']);
+    }
+}
