@@ -32,21 +32,21 @@
     </ul>
 
     <div class="card">
-        {{-- <div class="card-header">
+        <div class="card-header">
             <h5 class="mb-0 me-2">{{($dataTitle??$mainTitle)}}</h5>
             <div class="card-header-elements ms-auto">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-create" title="Profile Admin">
                     <span class="ri-profile-line me-2"></span>
                     Profile Admin
-                </button>
+                </button> --}}
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                         data-bs-target="#modal-create" title="Buat Data">
                     <span class="ri-add-line me-2"></span>
                     Buat Admin
                 </button>
             </div>
-        </div> --}}
+        </div>
         <div class="card-datatable table-responsive text-nowrap">
             <table class="table table-sm table-bordered table-hover"
                    id="main_table">
