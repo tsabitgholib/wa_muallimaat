@@ -24,7 +24,7 @@
 
                     <div class="card-body mt-2">
                         <div class="row text-center">
-                            <h3>{{config('app.name')}}</h3>
+                            <h3>{{config('app.nama_instansi')}}</h3>
                         </div>
                         <div class="row">
                             <div class="col-8">

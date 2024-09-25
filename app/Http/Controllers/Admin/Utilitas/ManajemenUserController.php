@@ -177,7 +177,7 @@ class ManajemenUserController extends Controller
                 },
             ],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'role' => ['required'],
+            // 'role' => ['required'],
         ], $this->messages());
 
         if ($validator->fails()) {
@@ -193,7 +193,7 @@ class ManajemenUserController extends Controller
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
             ]);
-            $user->syncRoles($request->role);
+            $user->syncRoles('admin');
 
             DB::commit();
             return response()->json(['message' => 'Sukses, data Admin telah disimpan '], 200);
@@ -224,7 +224,7 @@ class ManajemenUserController extends Controller
                     }
                 },
             ],
-            'role' => ['required'],
+            // 'role' => ['required'],
 
         ];
         if ($request->password != null) {
@@ -247,7 +247,7 @@ class ManajemenUserController extends Controller
                 $user->password =  bcrypt($request->password);
             }
             $user->save();
-            $user->syncRoles($request->role);
+            // $user->syncRoles($request->role);
 
             DB::commit();
             return response()->json(['message' => 'Sukses, data User telah disimpan '], 200);

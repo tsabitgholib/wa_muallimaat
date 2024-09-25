@@ -69,7 +69,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label" for="role">
                                 Role
                             </label>
@@ -85,7 +85,7 @@
                                     <option>data kosong</option>
                                 @endisset
                             </select>
-                        </div>
+                        </div> --}}
                         
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
@@ -169,7 +169,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label class="form-label" for="role">
                                 Role
                             </label>
@@ -185,7 +185,7 @@
                                     <option>data kosong</option>
                                 @endisset
                             </select>
-                        </div>
+                        </div> --}}
                         
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
