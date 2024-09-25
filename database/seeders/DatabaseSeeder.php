@@ -50,27 +50,27 @@ class DatabaseSeeder extends Seeder
         $user->assignRole($adminRole);
 
 
-        $agama = ['islam', 'budha', 'kristen', 'hindu', 'katolik'];
-        $minDate = '2015-01-01';
-        $maxDate = '2016-12-31';
+        // $agama = ['islam', 'budha', 'kristen', 'hindu', 'katolik'];
+        // $minDate = '2015-01-01';
+        // $maxDate = '2016-12-31';
 
-        for ($i = 1; $i <= 300; $i++) {
-            $randomKey = array_rand($agama);
-            $randomDate = fake()->dateTimeBetween($minDate, $maxDate);
-            $randomName = fake()->name;
-            $prefix = str_pad($i, 4, '0', STR_PAD_LEFT);
-            $nis = 123 . $prefix;
-            $user = User::create(
-                [
-                    'username' => $nis,
-                    'password' => bcrypt($nis),
-                    'login_token' => Str::random(50),
-                    'name' => $randomName,
-                ]
-            );
+        // for ($i = 1; $i <= 300; $i++) {
+        //     $randomKey = array_rand($agama);
+        //     $randomDate = fake()->dateTimeBetween($minDate, $maxDate);
+        //     $randomName = fake()->name;
+        //     $prefix = str_pad($i, 4, '0', STR_PAD_LEFT);
+        //     $nis = 123 . $prefix;
+        //     $user = User::create(
+        //         [
+        //             'username' => $nis,
+        //             'password' => bcrypt($nis),
+        //             'login_token' => Str::random(50),
+        //             'name' => $randomName,
+        //         ]
+        //     );
 
-            $user->assignRole('siswa');
-        }
+        //     $user->assignRole('siswa');
+        // }
     }
     /**
      * Seed the application's database.
