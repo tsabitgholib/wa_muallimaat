@@ -24,9 +24,9 @@ class ManajemenUserController extends Controller
         $this->mainTitle = 'Manajemen User';
         $this->dataTitle = 'Manajemen User';
         $this->showTitle = 'Detail Manajemen User';
-        $this->datasUrl = route('admin.utilitas.manajemen-user.get-data');
+        $this->datasUrl = route('admin.manajemen-user.get-data');
         $this->detailDatasUrl = '';
-        $this->columnsUrl = route('admin.utilitas.manajemen-user.get-column');
+        $this->columnsUrl = route('admin.manajemen-user.get-column');
     }
 
     public function index()

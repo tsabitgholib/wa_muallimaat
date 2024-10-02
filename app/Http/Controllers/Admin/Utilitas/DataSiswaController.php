@@ -222,8 +222,8 @@ class DataSiswaController extends Controller
         $data['mainTitle'] = $this->mainTitle;
         $data['dataTitle'] = $this->dataTitle;
         $data['showTitle'] = $this->showTitle;
-        $data['columnsUrl'] = route('admin.utilitas.data-siswa.get-column');
-        $data['datasUrl'] = route('admin.utilitas.data-siswa.get-data');
+        $data['columnsUrl'] = route('admin.data-siswa.get-column');
+        $data['datasUrl'] = route('admin.data-siswa.get-data');
         // $data['modalLink'] = view('admin.utilitas.notifikasi_whatsapp_tagihan.modal', compact('post'));
 
         return view('admin.utilitas.data_siswa.index', $data);

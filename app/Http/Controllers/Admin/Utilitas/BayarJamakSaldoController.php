@@ -16,9 +16,9 @@ class BayarJamakSaldoController extends Controller
         $this->mainTitle = 'Bayar Jamak';
         $this->dataTitle = 'Bayar Jamak';
         $this->showTitle = 'Detail Data PPDB';
-        $this->datasUrl = route('admin.utilitas.bayar-jamak-saldo.get-data');
+        $this->datasUrl = route('admin.bayar-jamak-saldo.get-data');
         $this->detailDatasUrl = '';
-        $this->columnsUrl = route('admin.utilitas.bayar-jamak-saldo.get-column');
+        $this->columnsUrl = route('admin.bayar-jamak-saldo.get-column');
     }
 
     public function index()

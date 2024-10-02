@@ -91,7 +91,7 @@
                                                 data-placeholder="Pilih Jenis Kelas" disabled>
                                         </select>
                                     </div>
-                                </div>    
+                                </div>
                             </div>
 
                         </div>
@@ -124,13 +124,13 @@
                                         data-control="select2"
                                         data-placeholder="Pilih Status Tagihan">
                                         <option
-                                        value="1">Semua Tagihan</option>                                    
+                                        value="1">Semua Tagihan</option>
                                         <option
-                                        value="2">Hanya Tagihan Dengan Urutan Terkecil</option>                                    
+                                        value="2">Hanya Tagihan Dengan Urutan Terkecil</option>
                                 </select>
                             </div>
                         </div>
-                        
+
                     </div>
                     <div class="w-100">
                         <div class="row">
@@ -261,7 +261,7 @@
             loadingAlert('Mengirim pesan <br><span class="text-danger"> *</span>Jangan menutup atau memuat ulang halaman!');
 
             let mainForm = $(this);
-            let url = '{{route('admin.utilitas.notifikasi-whatsapp-tunggakan.send-wa')}}';
+            let url = '{{route('admin.notifikasi-whatsapp-tunggakan.send-wa')}}';
             let tipe = 'POST';
             const formId = "filterForm";
             let data = $('#filterForm').serialize();
@@ -316,7 +316,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-kelas')}}",
+                        url: "{{route('admin.notifikasi-whatsapp-tunggakan.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,

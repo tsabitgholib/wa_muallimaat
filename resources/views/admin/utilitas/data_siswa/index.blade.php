@@ -91,7 +91,7 @@
                                                 data-placeholder="Pilih Jenis Kelas" disabled>
                                         </select>
                                     </div>
-                                </div>    
+                                </div>
                             </div>
 
                         </div>
@@ -116,7 +116,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                     </div>
                     <div class="w-100">
                         <div class="row">
@@ -146,7 +146,7 @@
                 </tbody>
             </table>
         </div>
-       
+
     </div>
 @endsection
 
@@ -244,7 +244,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.data-siswa.get-kelas')}}",
+                        url: "{{route('admin.data-siswa.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,

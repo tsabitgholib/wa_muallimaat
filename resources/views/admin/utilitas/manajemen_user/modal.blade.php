@@ -86,7 +86,7 @@
                                 @endisset
                             </select>
                         </div> --}}
-                        
+
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
                             <input type="email" class="form-control required" id="edit-email" name="email" autocomplete="off"
@@ -99,7 +99,7 @@
                             <label class="form-label" for="passwordInput">Password User</label>
                             <div class="input-group">
                                 <input type="password" class="form-control required" id="edit-passwordInput" placeholder="Password" name="password" autocomplete="false">
-                                
+
                                 <span class="input-group-text showPassword" title="Lihat Password">
                                     <i class="ri-eye-off-fill"></i>
                                 </span>
@@ -111,7 +111,7 @@
                             <label class="form-label" for="passwordConfirmationInput">Password Confirmation</label>
                             <div class="input-group">
                                 <input type="password" class="form-control required" id="edit-passwordConfirmationInput" placeholder="Password Confirmation" name="password_confirmation" autocomplete="false">
-                               
+
                                 <span class="input-group-text showPasswordConfirmation" title="Lihat Password">
                                     <i class="ri-eye-off-fill"></i>
                                 </span>
@@ -186,7 +186,7 @@
                                 @endisset
                             </select>
                         </div> --}}
-                        
+
                         <div class="mb-3">
                             <label class="form-label" for="email">Email</label>
                             <input type="email" class="form-control required" id="email" name="email" autocomplete="off"
@@ -199,7 +199,7 @@
                             <label class="form-label" for="passwordInput">Password User</label>
                             <div class="input-group">
                                 <input type="password" class="form-control required" id="passwordInput" placeholder="Password" name="password" autocomplete="false">
-                                
+
                                 <span class="input-group-text showPassword" title="Lihat Password">
                                     <i class="ri-eye-off-fill"></i>
                                 </span>
@@ -211,7 +211,7 @@
                             <label class="form-label" for="passwordConfirmationInput">Password Confirmation</label>
                             <div class="input-group">
                                 <input type="password" class="form-control required" id="passwordConfirmationInput" placeholder="Password Confirmation" name="password_confirmation" autocomplete="false">
-                               
+
                                 <span class="input-group-text showPasswordConfirmation" title="Lihat Password">
                                     <i class="ri-eye-off-fill"></i>
                                 </span>
@@ -299,19 +299,19 @@
             let data = $(this).serialize();
             if (formId === "deleteForm") {
                 loadingAlert('Menghapus data user');
-                url = '{{route('admin.utilitas.manajemen-user.destroy',':id')}}'
+                url = '{{route('admin.manajemen-user.destroy',':id')}}'
                 url = url.replace(':id', id_action)
                 tipe = 'DELETE';
                 pesan = "Data Akan Dihapus"
             } else if (formId === "editForm") {
                 loadingAlert('Mengubah data user');
-                url = '{{route('admin.utilitas.manajemen-user.update',':id')}}'
+                url = '{{route('admin.manajemen-user.update',':id')}}'
                 url = url.replace(':id', id_action)
                 tipe = 'PUT';
                 pesan = "Data Anda Akan Di Update"
             } else if (formId === "addForm") {
                 loadingAlert('Menyimpan data user');
-                url = '{{route('admin.utilitas.manajemen-user.store')}}'
+                url = '{{route('admin.manajemen-user.store')}}'
                 tipe = 'POST';
                 pesan = "Data Sudah Benar?"
             };
@@ -415,13 +415,13 @@
                 input.val(value);
             });
             console.log(id_action);
-            
+
         })
 
         $('#role').select2({
             dropdownParent: $('#modal-create')
         });
- 
+
 
         $('#modal-detail').on('show.bs.modal', function (e) {
             let data = $(e.relatedTarget).data('val')

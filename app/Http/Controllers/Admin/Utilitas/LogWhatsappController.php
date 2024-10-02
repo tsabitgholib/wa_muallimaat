@@ -157,8 +157,8 @@ class LogWhatsappController extends Controller
         $data['mainTitle'] = $this->mainTitle;
         $data['dataTitle'] = $this->dataTitle;
         $data['showTitle'] = $this->showTitle;
-        $data['columnsUrl'] = route('admin.utilitas.log-whatsapp.get-column');
-        $data['datasUrl'] = route('admin.utilitas.log-whatsapp.get-data');
+        $data['columnsUrl'] = route('admin.log-whatsapp.get-column');
+        $data['datasUrl'] = route('admin.log-whatsapp.get-data');
         // $data['modalLink'] = view('admin.utilitas.notifikasi_whatsapp_tagihan.modal', compact('post'));
 
         return view('admin.utilitas.log.index', $data);

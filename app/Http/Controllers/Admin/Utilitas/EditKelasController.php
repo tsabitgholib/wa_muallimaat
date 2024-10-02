@@ -17,9 +17,9 @@ class EditKelasController extends Controller
         $this->mainTitle = 'Edit Kelas';
         $this->dataTitle = 'Edit Kelas';
         $this->showTitle = 'Detail Kelas';
-        $this->datasUrl = route('admin.utilitas.edit-kelas.get-data');
+        $this->datasUrl = route('admin.edit-kelas.get-data');
         $this->detailDatasUrl = '';
-        $this->columnsUrl = route('admin.utilitas.edit-kelas.get-column');
+        $this->columnsUrl = route('admin.edit-kelas.get-column');
     }
 
     public function index()

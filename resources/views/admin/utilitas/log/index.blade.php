@@ -42,7 +42,7 @@
                     <div class="row">
                         <h5>Filter</h5>
                         <div class="col-lg-6">
-                            
+
                             <div class="mb-5">
                                 <label class="form-label" for="status_tagihan">
                                     Status
@@ -52,13 +52,13 @@
                                         data-control="select2"
                                         data-placeholder="Pilih Status Tagihan">
                                         <option
-                                        value="1">Berhasil</option>                                    
+                                        value="1">Berhasil</option>
                                         <option
-                                        value="2">Gagal</option>                                    
+                                        value="2">Gagal</option>
                                 </select>
                             </div>
                         </div>
-                        
+
                     </div>
                     <div class="w-100">
                         <div class="row">
@@ -186,7 +186,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tagihan.get-kelas')}}",
+                        url: "{{route('admin.notifikasi-whatsapp-tagihan.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,
