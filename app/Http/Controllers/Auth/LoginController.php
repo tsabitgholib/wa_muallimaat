@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogModel;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -54,12 +55,36 @@ class LoginController extends Controller
                 'captcha' => ['captcha salah, silahkan periksa kembali'],
             ]);
         }
-
-        // Continue with login attempt
-        return $this->guard()->attempt(
+        $authenticated = $this->guard()->attempt(
             $this->credentials($request),
             $request->filled('remember')
         );
+        if ($authenticated) {
+            LogModel::create([
+                'user_id' => auth()->check() ? auth()->user()->id : null,
+                'menu' => 'login',
+                'aksi' => 'login',
+                'target_id' => 'login',
+                'client_info' => $request->server('HTTP_USER_AGENT'),
+                'ip_address' => $request->ip(),
+                'status' => 'berhasil login'
+
+            ]);
+        } else {
+            LogModel::create([
+                'user_id' => auth()->check() ? auth()->user()->id : null,
+                'menu' => 'login',
+                'aksi' => 'login',
+                'target_id' => 'login',
+                'client_info' => $request->server('HTTP_USER_AGENT'),
+                'ip_address' => $request->ip(),
+                'status' => 'gagal login'
+
+            ]);
+        }
+
+        // Continue with login attempt
+        return $authenticated;
     }
 
     /**

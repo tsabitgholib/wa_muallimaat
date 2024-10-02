@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin\Utilitas;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogModel;
+use App\Models\LogWhatsappsModel;
 use App\Models\master_data\mst_kelas;
 use App\Models\master_data\mst_siswa;
 use App\Models\master_data\mst_thn_aka;
@@ -12,6 +14,7 @@ use App\Models\ScctcustModel;
 use App\Models\UAkunModel;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -102,7 +105,7 @@ class NotifikasiWhatsappController extends Controller
             'scctcust.DESC02 as kelas',
             'scctcust.DESC03 as kelompok',
             'scctcust.DESC04 as thn_aka',
-            'scctcust.NOCUST as nowa',
+            'scctcust.NOCUST as NO_WA',
             'scctcust.NOCUST as nis',
 
         ]);
@@ -152,7 +155,7 @@ class NotifikasiWhatsappController extends Controller
         $url = 'https://api.watzap.id/v1/send_message';
         switch ($per) {
             case 'id_thn_aka':
-                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'nowa')->where('DESC04', $request->id_thn_aka)->whereNotNull('nowa')->get();
+                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->where('DESC04', $request->id_thn_aka)->whereNotNull('NO_WA')->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
                 break;
             case 'kelas':
@@ -160,14 +163,14 @@ class NotifikasiWhatsappController extends Controller
                     ->where('DESC03', $kelas)
                     ->where('DESC02', $jenjang)
                     ->where('CODE02', $unit)
-                    ->whereNotNull('nowa')
-                    ->select('CUSTID', 'NMCUST', 'NOCUST', 'nowa')
+                    ->whereNotNull('NO_WA')
+                    ->select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')
                     ->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di kelas ini'], 422);
                 break;
             case 'siswa':
                 if (!$request->input('siswa')) return response()->json(['message' => 'Siswa tidak ditemukan'], 422);
-                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'nowa')->whereIn('NOCUST', $request->input('siswa'))->whereNotNull('nowa')->get();
+                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->whereIn('NOCUST', $request->input('siswa'))->whereNotNull('NO_WA')->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Siswa tidak ditemukan'], 422);
                 if (count($request->input('siswa')) != $siswas->count()) return response()->json(['message' => 'Jumlah siswa yang dipilih tidak sesuai dengan jumlah data, silahkan muat ulang halaman!'], 422);
                 break;
@@ -190,15 +193,41 @@ class NotifikasiWhatsappController extends Controller
         foreach ($siswas as $siswa) {
 
             try {
-                $payload['phone_no'] = $siswa->nowa;
+                $payload['phone_no'] = $siswa->NO_WA;
                 $payload['message'] = $pesan;
 
                 $jsonPayload = json_encode($payload);
                 $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+
                 Log::error('Wa Response: ' . $response);
                 $randomDelay = rand(1100000, 3200000);
                 usleep($randomDelay);
+                $arrResponse = json_decode($response, true);
+                DB::beginTransaction();
+
+                $log = new LogModel;
+                $log->user_id =  auth()->check() ? auth()->user()->id : null;
+                $log->menu =  'Whatsapp notif';
+                $log->aksi =  'Kirim Whatsapp notif';
+                $log->client_info =  $request->server('HTTP_USER_AGENT');
+                $log->target_id =  'Kirim Whatsapp notif';
+                $log->ip_address =   $request->ip();
+                $log->status =  $arrResponse['status'];
+                $log->save();
+
+                LogWhatsappsModel::create([
+                    'custid' => $siswa->CUSTID,
+                    'user_id' => auth()->check() ? auth()->user()->id : null,
+                    'log_id' => $log->id,
+                    'status' => $arrResponse['status'],
+                    'no_wa' => $siswa->NO_WA,
+                    'pesan' => $pesan,
+                    'nama' => $siswa->NMCUST,
+                    'response' => $response
+                ]);
+                DB::commit();
             } catch (Exception $e) {
+                DB::rollBack();
                 return response()->json(['error' => true, 'message' => $e->getMessage()], 500);
             }
         }

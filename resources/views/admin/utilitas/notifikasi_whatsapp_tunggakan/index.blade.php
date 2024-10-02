@@ -334,7 +334,7 @@
                         }
                     });
                 } else {
-                    $('#kelas-select').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
+                    $('#index-kelas').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
                 }
             });
 

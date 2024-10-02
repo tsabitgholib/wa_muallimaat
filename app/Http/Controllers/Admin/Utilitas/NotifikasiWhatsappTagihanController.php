@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin\Utilitas;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogModel;
+use App\Models\LogWhatsappsModel;
 use App\Models\master_data\mst_kelas;
 use App\Models\master_data\mst_post;
 use App\Models\master_data\mst_siswa;
@@ -20,6 +22,7 @@ use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -47,9 +50,8 @@ class NotifikasiWhatsappTagihanController extends Controller
             ['data' => 'no', 'name' => 'no'],
             ['data' => 'nis', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
-            ['data' => 'nowa', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
+            ['data' => 'NO_WA', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'PAIDST', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Dibayar', 'falseVal' => 'Belum Dibayar'],
-            ['data' => 'FIDBANK', 'name' => 'Metode', 'columnType' => 'custom_code_tagihan', 'searchable' => true, 'orderable' => true],
             ['data' => 'BTA', 'name' => 'Tahun AKA', 'searchable' => true, 'orderable' => true],
 
             // ['data' => 'nama_post', 'name' => 'Nama POST', 'searchable' => true, 'orderable' => true],
@@ -148,18 +150,20 @@ class NotifikasiWhatsappTagihanController extends Controller
         }
 
         $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
+            ->where('scctbill.FSTSBolehBayar', 1)
             ->count();
 
         $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
             ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
             ->where('scctbill.PAIDST', 0)
+            ->where('scctbill.FSTSBolehBayar', 1)
             ->whereAny([
                 'scctcust.NMCUST',
                 'scctcust.NOCUST',
                 'scctcust.DESC02',
                 'scctcust.DESC03',
                 'scctcust.CODE02',
-                'scctcust.nowa'
+                'scctcust.NO_WA'
             ], 'like', '%' . $searchValue . '%')
             ->where(function ($query) use ($filterQuery) {
                 if ($filterQuery) {
@@ -172,6 +176,7 @@ class NotifikasiWhatsappTagihanController extends Controller
             ScctBillModel::orderBy($columnName, $columnSortOrder)
             ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
             ->where('scctbill.PAIDST', 0)
+            ->where('scctbill.FSTSBolehBayar', 1)
             ->select([
                 'scctbill.AA',
                 'scctbill.BILLNM',
@@ -183,7 +188,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                 // 'scctbill.KodePost',
                 'scctcust.NMCUST AS nama',
                 'scctcust.NOCUST AS nis',
-                'scctcust.nowa'
+                'scctcust.NO_WA'
             ])
             ->whereAny([
                 'scctcust.NMCUST',
@@ -248,6 +253,7 @@ class NotifikasiWhatsappTagihanController extends Controller
         // $searchValue = $search_arr['value'];
         $filter = $request->input('filter');
 
+
         if ($filter) {
             // dd($filter);
             foreach ($filter as $key => $val) {
@@ -288,7 +294,8 @@ class NotifikasiWhatsappTagihanController extends Controller
         if ($request->status_tagihan == 1) {
             $records = ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
                 ->where('scctbill.PAIDST', 0)
-                ->whereNotNull('scctcust.nowa')
+                ->whereNotNull('scctcust.NO_WA')
+                ->where('scctbill.FSTSBolehBayar', 1)
                 ->select([
                     'scctbill.AA',
                     'scctbill.BILLNM',
@@ -301,7 +308,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                     'scctcust.NMCUST',
                     'scctcust.NOCUST',
                     'scctcust.CUSTID',
-                    'scctcust.nowa',
+                    'scctcust.NO_WA',
                 ])
                 ->where(function ($query) use ($filterQuery) {
                     if ($filterQuery) {
@@ -315,7 +322,8 @@ class NotifikasiWhatsappTagihanController extends Controller
             $records =
                 ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
                 ->where('scctbill.PAIDST', 0)
-                ->whereNotNull('scctcust.nowa')
+                ->whereNotNull('scctcust.NO_WA')
+                ->where('scctbill.FSTSBolehBayar', 1)
                 ->select([
                     'scctbill.AA',
                     'scctbill.BILLNM',
@@ -326,7 +334,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                     'scctbill.FUrutan',
                     'scctcust.NMCUST',
                     'scctcust.NOCUST',
-                    'scctcust.nowa',
+                    'scctcust.NO_WA',
                     'scctcust.CUSTID',
                 ])
                 ->where(function ($query) use ($filterQuery) {
@@ -343,6 +351,18 @@ class NotifikasiWhatsappTagihanController extends Controller
             "api_key" => "1FOPYD2SA8VPIU4Q",
             "number_key" => "3eF1CHDzjLi35eE2",
         ];
+
+        $log = new LogModel();
+        $log->user_id =  auth()->check() ? auth()->user()->id : null;
+        $log->menu =  'Whatsapp Tagihan';
+        $log->aksi =  'Kirim Whatsapp Tagihan';
+        $log->client_info =  $request->server('HTTP_USER_AGENT');
+        $log->target_id =  'Kirim Whatsapp Tagihan';
+        $log->ip_address =   $request->ip();
+        $log->status =  "kirim whatsapp";
+        $log->save();
+
+        $idLog = $log->id;
 
         $url = 'https://api.watzap.id/v1/send_message';
         foreach ($records as $siswa) {
@@ -366,10 +386,12 @@ class NotifikasiWhatsappTagihanController extends Controller
                 if ($request->status_tagihan == 1) {
                     $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
                         ->where('PAIDST', 0)
+                        ->where('scctbill.FSTSBolehBayar', 1)
                         ->get();
                 } else {
                     $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
                         ->where('PAIDST', 0)
+                        ->where('scctbill.FSTSBolehBayar', 1)
                         ->groupBy('scctbill.CUSTID')
                         ->orderBy('scctbill.FUrutan', 'desc')
                         ->get();
@@ -385,7 +407,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                     $randomArray
                 );
 
-                $payload['phone_no'] = $siswa->nowa;
+                $payload['phone_no'] = $siswa->NO_WA;
                 $payload['message'] = $message;
 
                 // $payload['target'] = $siswa->custid;
@@ -399,8 +421,24 @@ class NotifikasiWhatsappTagihanController extends Controller
 
                 $randomDelay = rand(1100000, 3200000);
                 usleep($randomDelay);
-            } catch (Exception $e) {
 
+                $arrResponse = json_decode($response, true);
+                DB::beginTransaction();
+
+                LogWhatsappsModel::create([
+                    'custid' => $siswa->CUSTID,
+                    'log_id' => $idLog,
+                    'user_id' => Auth::id(),
+                    'status' => $arrResponse['status'],
+                    'no_wa' => $siswa->NO_WA,
+                    'pesan' => $message,
+                    'nama' => $siswa->NMCUST,
+                    'response' => $response
+                ]);
+
+                DB::commit();
+            } catch (Exception $e) {
+                DB::rollBack();
                 Log::channel('whatsapp')->error('Payment failed', [
                     'error' => $e->getMessage(),
                     'NOREFF' => "error"

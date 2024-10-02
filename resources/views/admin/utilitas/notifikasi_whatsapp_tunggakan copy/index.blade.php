@@ -40,7 +40,7 @@
             <form id="filterForm">
                 <fieldset class="form-fieldset">
                     <div class="row">
-                        <h5>Kirim Berdasarkan</h5>
+                        <h5>Filter</h5>
                         <div class="col-lg-6">
                             <div class="mb-5">
                                 <label class="form-label" for="cari_siswa">
@@ -67,32 +67,31 @@
                             </div> --}}
 
                             <div class="mb-5">
-                                    <label class="form-label" for="kelas">
-                                        Kelas
-                                    </label>
-                                    <div class="row">
-                                        <div class="col">
-                                            <select class="form-select" id="unit" name="unit"
-                                                    data-control="select2"
-                                                    data-placeholder="Pilih Jenis Unit">
-                                                <option></option>
-                                                <option>Semua</option>
-                                                @isset($kelas)
-                                                    @foreach ($kelas as $k)
-                                                        <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
-                                                    @endforeach
-                                                @else
-                                                    <option>Tidak Ada Data</option>
-                                                @endisset
-                                            </select>
-                                        </div>
-                                        <div class="col">
-                                            <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
-                                                    data-placeholder="Pilih Jenis Kelas" disabled>
-                                            </select>
-                                        </div>
+                                <label class="form-label" for="kelas">
+                                    Kelas
+                                </label>
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select" id="unit" name="unit"
+                                                data-control="select2"
+                                                data-placeholder="Pilih Jenis Unit">
+                                            <option></option>
+                                            <option>Semua</option>
+                                            @isset($kelas)
+                                                @foreach ($kelas as $k)
+                                                    <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
+                                                @endforeach
+                                            @else
+                                                <option>Tidak Ada Data</option>
+                                            @endisset
+                                        </select>
                                     </div>
-                                   
+                                    <div class="col">
+                                        <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
+                                                data-placeholder="Pilih Jenis Kelas" disabled>
+                                        </select>
+                                    </div>
+                                </div>    
                             </div>
 
                         </div>
@@ -114,20 +113,6 @@
                                     @else
                                         <option>data kosong</option>
                                     @endisset
-                                </select>
-                            </div>
-                            <div class="mb-5">
-                                <label class="form-label" for="status_tagihan">
-                                    Status
-                                </label>
-                                <select class="form-select" id="status_tagihan"
-                                        name="status_tagihan"
-                                        data-control="select2"
-                                        data-placeholder="Pilih Status Tagihan">
-                                        <option
-                                        value="1">Semua Tagihan</option>                                    
-                                        <option
-                                        value="2">Hanya Tagihan Dengan Urutan Terkecil</option>                                    
                                 </select>
                             </div>
                         </div>
@@ -161,14 +146,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer border-0 pt-0">
-            <div class="d-flex justify-content-end gap-4">
-                <button type="btn" class="btn btn-success" onclick="sendWhatsapp()">
-                    <span class="tf-icon ri-whatsapp-line me-2"></span>
-                    Kirim
-                </button>
-            </div>
-        </div>
+       
     </div>
 @endsection
 
@@ -257,58 +235,7 @@
                 }
             }
         }
-
-        function sendWhatsapp() {
-            loadingAlert('Mengirim pesan <br><span class="text-danger"> *</span>Jangan menutup atau memuat ulang halaman!');
-
-            let mainForm = $(this);
-            let url = '{{route('admin.utilitas.notifikasi-whatsapp-tagihan.send-wa')}}';
-            let tipe = 'POST';
-            const formId = "filterForm";
-            let data = $('#filterForm').serialize();
-
-            let ajaxOptions = {
-                url: url,
-                type: tipe,
-                data: data,
-                datatype: 'json',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-            }
-            clearErrorMessages(formId)
-            $.ajax(ajaxOptions).done(function (responses) {
-                document.getElementById(formId).reset();
-
-                // refreshDataTable();
-                // cardSiswa.addClass('d-none');
-                // cardSiswa.prev().addClass('d-none');
-                successAlert(responses.message)
-                // (responses.message);
-            }).fail(function (xhr) {
-                if (xhr.status === 422) {
-                    const errMessage = xhr.responseJSON.message
-                    errorAlert(errMessage)
-                    const errors = JSON.parse(xhr.responseText).error
-                    if (errors) {
-                        processErros(errors)
-                    }
-                } else if (xhr.status === 419) {
-                    errorAlert('Sesi anda telah habis, Silahkan Login Kembali');
-                } else if (xhr.status === 500) {
-                    errorAlert('Tidak dapat terhubung ke server, Silahkan periksa koneksi internet anda');
-                } else if (xhr.status === 403) {
-                    errorAlert('Anda tidak memiliki izin untuk mengakses halaman ini');
-                } else if (xhr.status === 404) {
-                    errorAlert('Halaman tidak ditemukan');
-                } else {
-                    errorAlert('Terjadi kesalahan, silahkan coba memuat ulang halaman');
-                }
-            })
-
-        }
         document.addEventListener("DOMContentLoaded", function () {
-
             $('#unit').change(function() {
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
                 var selectedValue = $(this).val();
@@ -317,7 +244,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tagihan.get-kelas')}}",
+                        url: "{{route('admin.utilitas.data-siswa.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,

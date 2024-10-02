@@ -32,7 +32,7 @@ use Termwind\Components\Dd;
 
 use function Laravel\Prompts\select;
 
-class NotifikasiWhatsappTunggakanController extends Controller
+class NotifikasiWhatsappTanggunganController extends Controller
 {
 
     public $mainTitle;
@@ -40,16 +40,16 @@ class NotifikasiWhatsappTunggakanController extends Controller
     public function __construct()
     {
         $this->title = 'Keuangan';
-        $this->mainTitle = 'TunggakanTagihan Siswa';
-        $this->dataTitle = 'Data TunggakanTagihan';
-        $this->showTitle = 'Detail Data Tunggakan Tagihan';
+        $this->mainTitle = 'Tanggungan Tagihan Siswa';
+        $this->dataTitle = 'Data Tanggungan Tagihan';
+        $this->showTitle = 'Detail Data Tanggungan Tagihan';
     }
 
     public function getColumn()
     {
         return [
             ['data' => 'no', 'name' => 'no'],
-            ['data' => 'nis', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
+            ['data' => 'NO', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
             ['data' => 'NO_WA', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'PAIDST', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Dibayar', 'falseVal' => 'Belum Dibayar'],
@@ -143,7 +143,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
 
         $tahun = Carbon::now()->year;
         $bulan = Carbon::now()->format('m');
-        $filters[] = ['scctbill.BILLAC', '<', '' . $tahun . $bulan];
+        $filters[] = ['scctbill.BILLAC', '<=', '' . $tahun . $bulan];
         if (!empty($filters)) {
             $filterQuery = function ($query) use ($filters) {
                 foreach ($filters as $filter) {
@@ -157,7 +157,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
         }
 
         $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
-            ->where('scctbill.BILLAC', '<', '' . $tahun . $bulan)
+            ->where('scctbill.BILLAC', '<=', '' . $tahun . $bulan)
             ->where('scctbill.FSTSBolehBayar', 1)
             ->count();
 
@@ -245,11 +245,11 @@ class NotifikasiWhatsappTunggakanController extends Controller
         $data['mainTitle'] = $this->mainTitle;
         $data['dataTitle'] = $this->dataTitle;
         $data['showTitle'] = $this->showTitle;
-        $data['columnsUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-column');
-        $data['datasUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-data');
+        $data['columnsUrl'] = route('admin.utilitas.notifikasi-whatsapp-tanggungan.get-column');
+        $data['datasUrl'] = route('admin.utilitas.notifikasi-whatsapp-tanggungan.get-data');
         // $data['modalLink'] = view('admin.utilitas.notifikasi_whatsapp_tagihan.modal', compact('post'));
 
-        return view('admin.utilitas.notifikasi_whatsapp_tunggakan.index', $data);
+        return view('admin.utilitas.notifikasi_whatsapp_tanggungan.index', $data);
     }
 
     public function sendWhatsapp(Request $request)
@@ -287,7 +287,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
         }
         $tahun = Carbon::now()->year;
         $bulan = Carbon::now()->format('m');
-        $filters[] = ['scctbill.BILLAC', '<', '' . $tahun . $bulan];
+        $filters[] = ['scctbill.BILLAC', '<=', '' . $tahun . $bulan];
 
         if (!empty($filters)) {
             $filterQuery = function ($query) use ($filters) {
@@ -362,13 +362,12 @@ class NotifikasiWhatsappTunggakanController extends Controller
             "api_key" => "1FOPYD2SA8VPIU4Q",
             "number_key" => "3eF1CHDzjLi35eE2",
         ];
-
         $log = new LogModel();
         $log->user_id =  auth()->check() ? auth()->user()->id : null;
-        $log->menu =  'Whatsapp Tunggakan';
-        $log->aksi =  'Kirim Whatsapp Tunggakan';
+        $log->menu =  'Whatsapp Tanggungan';
+        $log->aksi =  'Kirim Whatsapp Tanggungan';
         $log->client_info =  $request->server('HTTP_USER_AGENT');
-        $log->target_id =  'Kirim Whatsapp Tunggakan';
+        $log->target_id =  'Kirim Whatsapp Tanggungan';
         $log->ip_address =   $request->ip();
         $log->status =  'kirim whatsapp';
         $log->save();
@@ -394,7 +393,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
 
                 if ($request->status_tagihan == 1) {
                     $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
-                        ->where('BILLAC', '<', '' . $tahun . $bulan)
+                        ->where('BILLAC', '<=', '' . $tahun . $bulan)
                         ->where('scctbill.FSTSBolehBayar', 1)
                         ->where('PAIDST', 0)
                         ->get();
@@ -402,7 +401,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
                     $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
                         ->where('PAIDST', 0)
                         ->where('scctbill.FSTSBolehBayar', 1)
-                        ->where('BILLAC', '<', '' . $tahun . $bulan)
+                        ->where('BILLAC', '<=', '' . $tahun . $bulan)
                         ->groupBy('scctbill.CUSTID')
                         ->orderBy('scctbill.FUrutan', 'desc')
                         ->get();

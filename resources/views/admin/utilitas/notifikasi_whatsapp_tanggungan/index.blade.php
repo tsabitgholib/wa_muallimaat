@@ -67,32 +67,31 @@
                             </div> --}}
 
                             <div class="mb-5">
-                                    <label class="form-label" for="kelas">
-                                        Kelas
-                                    </label>
-                                    <div class="row">
-                                        <div class="col">
-                                            <select class="form-select" id="unit" name="unit"
-                                                    data-control="select2"
-                                                    data-placeholder="Pilih Jenis Unit">
-                                                <option></option>
-                                                <option>Semua</option>
-                                                @isset($kelas)
-                                                    @foreach ($kelas as $k)
-                                                        <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
-                                                    @endforeach
-                                                @else
-                                                    <option>Tidak Ada Data</option>
-                                                @endisset
-                                            </select>
-                                        </div>
-                                        <div class="col">
-                                            <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
-                                                    data-placeholder="Pilih Jenis Kelas" disabled>
-                                            </select>
-                                        </div>
+                                <label class="form-label" for="kelas">
+                                    Kelas
+                                </label>
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select" id="unit" name="unit"
+                                                data-control="select2"
+                                                data-placeholder="Pilih Jenis Unit">
+                                            <option></option>
+                                            <option>Semua</option>
+                                            @isset($kelas)
+                                                @foreach ($kelas as $k)
+                                                    <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
+                                                @endforeach
+                                            @else
+                                                <option>Tidak Ada Data</option>
+                                            @endisset
+                                        </select>
                                     </div>
-                                   
+                                    <div class="col">
+                                        <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
+                                                data-placeholder="Pilih Jenis Kelas" disabled>
+                                        </select>
+                                    </div>
+                                </div>    
                             </div>
 
                         </div>
@@ -262,7 +261,7 @@
             loadingAlert('Mengirim pesan <br><span class="text-danger"> *</span>Jangan menutup atau memuat ulang halaman!');
 
             let mainForm = $(this);
-            let url = '{{route('admin.utilitas.notifikasi-whatsapp-tagihan.send-wa')}}';
+            let url = '{{route('admin.utilitas.notifikasi-whatsapp-tanggungan.send-wa')}}';
             let tipe = 'POST';
             const formId = "filterForm";
             let data = $('#filterForm').serialize();
@@ -317,7 +316,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tagihan.get-kelas')}}",
+                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,
@@ -335,7 +334,7 @@
                         }
                     });
                 } else {
-                    $('#index-kelas').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
+                    $('#kelas-select').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
                 }
             });
 
