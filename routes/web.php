@@ -27,24 +27,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::resource('profile', \App\Http\Controllers\Admin\ProfileController::class)->names('profile');
 
-    Route::prefix('keuangan')->name('keuangan.')->group(function () {
-        Route::prefix('penerimaan-siswa')->name('penerimaan-siswa.')->group(function () {
-            Route::prefix('data-penerimaan')->name('data-penerimaan.')->group(function () {
-                Route::get('get-data', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\DataPenerimaanController::class, 'getData'])->name('get-data');
-                Route::get('get-column', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\DataPenerimaanController::class, 'getColumn'])->name('get-column');
-                Route::get('cetak-tagihan-dibayar', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\DataPenerimaanController::class, 'cetakPembayaran'])->name('cetak-tagihan-dibayar');
-            });
-            Route::resource('data-penerimaan', \App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\DataPenerimaanController::class)->names('data-penerimaan');
-
-            Route::prefix('rekap-penerimaan')->name('rekap-penerimaan.')->group(function () {
-                Route::get('get-data', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\RekapPenerimaanController::class, 'getData'])->name('get-data');
-                Route::get('get-column', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\RekapPenerimaanController::class, 'getColumn'])->name('get-column');
-                Route::get('cetak-rekap', [\App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\RekapPenerimaanController::class, 'cetakRekapPenerimaan'])->name('cetak-rekap');
-            });
-            Route::resource('rekap-penerimaan', \App\Http\Controllers\Admin\Keuangan\PenerimaanSiswa\RekapPenerimaanController::class)->names('rekap-penerimaan');
-        });
-    });
-
     Route::prefix('utilitas')->name('utilitas.')->group(function () {
 
 
