@@ -28,6 +28,7 @@ class LogWhatsappController extends Controller
     {
         return [
             ['data' => 'no', 'name' => 'no'],
+            ['data' => 'nama_admin', 'name' => 'pengirim', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
             ['data' => 'no_wa', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'status', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Berhasil', 'falseVal' => 'Gagal'],
@@ -44,7 +45,7 @@ class LogWhatsappController extends Controller
         $columnName_arr = $request->get('columns');
         $search_arr = $request->get('search');
 
-        $defaultColumn = 'id';
+        $defaultColumn = 'log_whatsapps.id';
         $defaultOrder = 'desc';
 
         if ($request->has('order')) {
@@ -93,14 +94,15 @@ class LogWhatsappController extends Controller
             };
         }
 
-        $totalRecords = LogWhatsappsModel::select('count(*) as allcount')
-            ->count();
+        $totalRecords = LogWhatsappsModel::leftJoin('users', 'users.id', 'log_whatsapps.user_id')->select('count(*) as allcount')->count();
 
-        $totalRecordswithFilter = LogWhatsappsModel::select('count(*) as allcount')
+        $totalRecordswithFilter = LogWhatsappsModel::join('users', 'users.id', 'log_whatsapps.user_id')
+            ->select('count(*) as allcount')
             ->whereAny([
-                'nama',
-                'no_wa',
-                'pesan',
+                'log_whatsapps.nama',
+                'log_whatsapps.no_wa',
+                'log_whatsapps.pesan',
+                'users.name',
             ], 'like', '%' . $searchValue . '%')
             ->where(function ($query) use ($filterQuery) {
                 if ($filterQuery) {
@@ -109,17 +111,21 @@ class LogWhatsappController extends Controller
             })
             ->count();
 
-        $records = LogWhatsappsModel::orderBy($columnName, $columnSortOrder)
+        $records = LogWhatsappsModel::leftJoin('users', 'users.id', 'log_whatsapps.user_id')
+            ->orderBy($columnName, $columnSortOrder)
             ->select([
-                'nama',
-                'no_wa',
-                'pesan',
-                'status',
+                'log_whatsapps.nama',
+                'log_whatsapps.no_wa',
+                'log_whatsapps.id',
+                'log_whatsapps.pesan',
+                'log_whatsapps.status',
+                'users.name as nama_admin',
             ])
             ->whereAny([
-                'nama',
-                'no_wa',
-                'pesan',
+                'log_whatsapps.nama',
+                'log_whatsapps.no_wa',
+                'log_whatsapps.pesan',
+                'users.name',
             ], 'like', '%' . $searchValue . '%')
             ->where(function ($query) use ($filterQuery) {
                 if ($filterQuery) {
@@ -136,6 +142,7 @@ class LogWhatsappController extends Controller
                 unset($item->id);
                 return $item;
             })->toArray();
+
 
         $response = array(
             "draw" => intval($draw),

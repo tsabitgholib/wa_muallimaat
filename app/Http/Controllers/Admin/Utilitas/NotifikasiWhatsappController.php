@@ -190,6 +190,15 @@ class NotifikasiWhatsappController extends Controller
         // ];
 
         // dd($siswas);
+        $log = new LogModel;
+        $log->user_id =  auth()->check() ? auth()->user()->id : null;
+        $log->menu =  'Whatsapp notif';
+        $log->aksi =  'Kirim Whatsapp notif';
+        $log->client_info =  $request->server('HTTP_USER_AGENT');
+        $log->target_id =  'Kirim Whatsapp notif';
+        $log->ip_address =   $request->ip();
+        $log->status =  "kirim whatsapp";
+        $log->save();
         foreach ($siswas as $siswa) {
 
             try {
@@ -205,15 +214,7 @@ class NotifikasiWhatsappController extends Controller
                 $arrResponse = json_decode($response, true);
                 DB::beginTransaction();
 
-                $log = new LogModel;
-                $log->user_id =  auth()->check() ? auth()->user()->id : null;
-                $log->menu =  'Whatsapp notif';
-                $log->aksi =  'Kirim Whatsapp notif';
-                $log->client_info =  $request->server('HTTP_USER_AGENT');
-                $log->target_id =  'Kirim Whatsapp notif';
-                $log->ip_address =   $request->ip();
-                $log->status =  $arrResponse['status'];
-                $log->save();
+
 
                 LogWhatsappsModel::create([
                     'custid' => $siswa->CUSTID,
