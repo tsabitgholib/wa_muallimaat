@@ -98,7 +98,7 @@
                                         data-placeholder="Pilih Jenis Kelas" disabled>
                                 </select>
                             </div>
-                        </div>    
+                        </div>
                     </div>
                     <div class="mb-5">
                         <label class="form-label" for="cari_siswa">
@@ -178,7 +178,7 @@
         }
 
         function getSiswa(Per, Angkatan, Kelas, unit, siswa = null) {
-            let url = '{{route('admin.utilitas.notifikasi-whatsapp.get-siswa')}}';
+            let url = '{{route('admin.notifikasi-whatsapp.get-siswa')}}';
             let ajaxOptions = {
                 url: url,
                 type: 'get',
@@ -197,7 +197,7 @@
 
             $.ajax(ajaxOptions).done(function (response) {
                 console.log(response.data);
-            
+
                 refreshDataTable(response.data);
             }).fail(function (xhr) {
                 if (xhr.status === 422) {
@@ -283,7 +283,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.utilitas.notifikasi-whatsapp-tagihan.get-kelas')}}",
+                        url: "{{route('admin.notifikasi-whatsapp-tagihan.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,
@@ -381,7 +381,7 @@
                 loadingAlert('Mengirim pesan <br><span class="text-danger"> *</span>Jangan menutup atau memuat ulang halaman!');
 
                 let mainForm = $(this);
-                let url = '{{route('admin.utilitas.notifikasi-whatsapp.send-wa')}}';
+                let url = '{{route('admin.notifikasi-whatsapp.send-wa')}}';
                 let tipe = 'POST';
                 const formId = mainForm.attr('id');
                 let data = mainForm.serialize();

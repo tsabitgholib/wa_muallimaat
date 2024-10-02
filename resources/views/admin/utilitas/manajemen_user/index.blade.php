@@ -99,7 +99,6 @@
                 });
             }
 
-            
             if (select2.length) {
                 select2.each(function () {
                     let $this = $(this);

@@ -27,78 +27,68 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::resource('profile', \App\Http\Controllers\Admin\ProfileController::class)->names('profile');
 
-    Route::prefix('utilitas')->name('utilitas.')->group(function () {
-
-
-        Route::prefix('manajemen-user')->name('manajemen-user.')->group(function () {
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class, 'getColumn'])->name('get-column');
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class, 'getData'])->name('get-data');
-        });
-
-        Route::resource('manajemen-user', \App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class)->names('manajemen-user');
-
-        Route::prefix('notifikasi-whatsapp')->name('notifikasi-whatsapp.')->group(function () {
-            Route::get('get-siswa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class, 'getSiswa'])->name('get-siswa');
-            Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class, 'sendWa'])->name('send-wa');
-        });
-
-        Route::resource('notifikasi-whatsapp', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class)->names('notifikasi-whatsapp');
-
-        Route::prefix('notifikasi-whatsapp-tagihan')->name('notifikasi-whatsapp-tagihan.')->group(function () {
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getColumn'])->name('get-column');
-            Route::get('cetak', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'cetak'])->name('cetak');
-            Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'sendWhatsapp'])->name('send-wa');
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getKelas'])->name('get-kelas');
-        });
-        Route::resource('notifikasi-whatsapp-tagihan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class)->names('notifikasi-whatsapp-tagihan');
-
-        Route::prefix('notifikasi-whatsapp-tunggakan')->name('notifikasi-whatsapp-tunggakan.')->group(function () {
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getKelas'])->name('get-kelas');
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getColumn'])->name('get-column');
-            Route::get('cetak', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'cetak'])->name('cetak');
-            Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'sendWhatsapp'])->name('send-wa');
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getKelas'])->name('get-kelas');
-        });
-        Route::resource('notifikasi-whatsapp-tunggakan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class)->names('notifikasi-whatsapp-tunggakan');
-
-        Route::prefix('notifikasi-whatsapp-tanggungan')->name('notifikasi-whatsapp-tanggungan.')->group(function () {
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getKelas'])->name('get-kelas');
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getColumn'])->name('get-column');
-            Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'sendWhatsapp'])->name('send-wa');
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getKelas'])->name('get-kelas');
-        });
-        Route::resource('notifikasi-whatsapp-tanggungan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class)->names('notifikasi-whatsapp-tanggungan');
-
-        Route::prefix('data-siswa')->name('data-siswa.')->group(function () {
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getKelas'])->name('get-kelas');
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getColumn'])->name('get-column');
-            Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'sendWhatsapp'])->name('send-wa');
-            Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getKelas'])->name('get-kelas');
-        });
-        Route::resource('data-siswa', \App\Http\Controllers\Admin\Utilitas\DataSiswaController::class)->names('data-siswa');
-
-        Route::prefix('log-whatsapp')->name('log-whatsapp.')->group(function () {
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class, 'getColumn'])->name('get-column');
-        });
-        Route::resource('log-whatsapp', \App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class)->names('log-whatsapp');
-
-        Route::prefix('log-aktifitas')->name('log-aktifitas.')->group(function () {
-            Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class, 'getData'])->name('get-data');
-            Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class, 'getColumn'])->name('get-column');
-        });
-        Route::resource('log-aktifitas', \App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class)->names('log-aktifitas');
+    Route::prefix('manajemen-user')->name('manajemen-user.')->group(function () {
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class, 'getColumn'])->name('get-column');
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class, 'getData'])->name('get-data');
     });
-});
 
-Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-    Route::get('/', function () {
-        return view('siswa.index');
-    })->name('index');
+    Route::resource('manajemen-user', \App\Http\Controllers\Admin\Utilitas\ManajemenUserController::class)->names('manajemen-user');
+
+    Route::prefix('notifikasi-whatsapp')->name('notifikasi-whatsapp.')->group(function () {
+        Route::get('get-siswa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class, 'getSiswa'])->name('get-siswa');
+        Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class, 'sendWa'])->name('send-wa');
+    });
+
+    Route::resource('notifikasi-whatsapp', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappController::class)->names('notifikasi-whatsapp');
+
+    Route::prefix('notifikasi-whatsapp-tagihan')->name('notifikasi-whatsapp-tagihan.')->group(function () {
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getColumn'])->name('get-column');
+        Route::get('cetak', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'cetak'])->name('cetak');
+        Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'sendWhatsapp'])->name('send-wa');
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class, 'getKelas'])->name('get-kelas');
+    });
+    Route::resource('notifikasi-whatsapp-tagihan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTagihanController::class)->names('notifikasi-whatsapp-tagihan');
+
+    Route::prefix('notifikasi-whatsapp-tunggakan')->name('notifikasi-whatsapp-tunggakan.')->group(function () {
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getKelas'])->name('get-kelas');
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getColumn'])->name('get-column');
+        Route::get('cetak', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'cetak'])->name('cetak');
+        Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'sendWhatsapp'])->name('send-wa');
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class, 'getKelas'])->name('get-kelas');
+    });
+    Route::resource('notifikasi-whatsapp-tunggakan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTunggakanController::class)->names('notifikasi-whatsapp-tunggakan');
+
+    Route::prefix('notifikasi-whatsapp-tanggungan')->name('notifikasi-whatsapp-tanggungan.')->group(function () {
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getKelas'])->name('get-kelas');
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getColumn'])->name('get-column');
+        Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'sendWhatsapp'])->name('send-wa');
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class, 'getKelas'])->name('get-kelas');
+    });
+    Route::resource('notifikasi-whatsapp-tanggungan', \App\Http\Controllers\Admin\Utilitas\NotifikasiWhatsappTanggunganController::class)->names('notifikasi-whatsapp-tanggungan');
+
+    Route::prefix('data-siswa')->name('data-siswa.')->group(function () {
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getKelas'])->name('get-kelas');
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getColumn'])->name('get-column');
+        Route::post('send-wa', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'sendWhatsapp'])->name('send-wa');
+        Route::post('get-kelas', [\App\Http\Controllers\Admin\Utilitas\DataSiswaController::class, 'getKelas'])->name('get-kelas');
+    });
+    Route::resource('data-siswa', \App\Http\Controllers\Admin\Utilitas\DataSiswaController::class)->names('data-siswa');
+
+    Route::prefix('log-whatsapp')->name('log-whatsapp.')->group(function () {
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class, 'getColumn'])->name('get-column');
+    });
+    Route::resource('log-whatsapp', \App\Http\Controllers\Admin\Utilitas\LogWhatsappController::class)->names('log-whatsapp');
+
+    Route::prefix('log-aktifitas')->name('log-aktifitas.')->group(function () {
+        Route::get('get-data', [\App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class, 'getData'])->name('get-data');
+        Route::get('get-column', [\App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class, 'getColumn'])->name('get-column');
+    });
+    Route::resource('log-aktifitas', \App\Http\Controllers\Admin\Utilitas\LogAktifitasController::class)->names('log-aktifitas');
 });
 
 Route::get('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout']);

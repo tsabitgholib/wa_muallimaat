@@ -245,8 +245,8 @@ class NotifikasiWhatsappTunggakanController extends Controller
         $data['mainTitle'] = $this->mainTitle;
         $data['dataTitle'] = $this->dataTitle;
         $data['showTitle'] = $this->showTitle;
-        $data['columnsUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-column');
-        $data['datasUrl'] = route('admin.utilitas.notifikasi-whatsapp-tunggakan.get-data');
+        $data['columnsUrl'] = route('admin.notifikasi-whatsapp-tunggakan.get-column');
+        $data['datasUrl'] = route('admin.notifikasi-whatsapp-tunggakan.get-data');
         // $data['modalLink'] = view('admin.utilitas.notifikasi_whatsapp_tagihan.modal', compact('post'));
 
         return view('admin.utilitas.notifikasi_whatsapp_tunggakan.index', $data);

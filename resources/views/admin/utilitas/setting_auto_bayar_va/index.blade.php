@@ -188,7 +188,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             formAction.on('submit',function (e){
                 e.preventDefault();
-                let url =  '{{route('admin.utilitas.setting-auto-bayar.store')}}';
+                let url =  '{{route('admin.setting-auto-bayar.store')}}';
                 let tipe = 'POST'
                 const formId = $(this).attr('id');
                 let data = $(this).serialize();

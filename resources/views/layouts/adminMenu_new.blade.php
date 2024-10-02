@@ -31,55 +31,54 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        <li class="menu-item {{ Request::is(['admin/utilitas*'])  ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ri ri-tools-line"></i>
-                <div data-i18n="Utilitas">Utilitas</div>
+        <li class="menu-item {{ Request::is(['admin/data-siswa*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.data-siswa.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-team-line"></i>
+                <div data-i18n="Notifikasi Whatsapp">Data Siswa</div>
             </a>
-            <ul class="menu-sub">
-            
-                <li class="menu-item {{ Request::is(['admin/utilitas/data-siswa*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.data-siswa.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Data Siswa</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/notifikasi-whatsapp'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.notifikasi-whatsapp.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Notifikasi Whatsap</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/notifikasi-whatsapp-tagihan*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.notifikasi-whatsapp-tagihan.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Whatsap Tagihan</div>
-                    </a>
-                </li>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/notifikasi-whatsapp'])  ? 'active' : '' }}">
+            <a href="{{route('admin.notifikasi-whatsapp.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-notification-badge-line"></i>
+                <div data-i18n="Notifikasi Whatsapp">Notifikasi Whatsap</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/notifikasi-whatsapp-tagihan*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.notifikasi-whatsapp-tagihan.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-notification-line"></i>
+                <div data-i18n="Notifikasi Whatsapp">Whatsap Tagihan</div>
+            </a>
+        </li>
 
-                <li class="menu-item {{ Request::is(['admin/utilitas/notifikasi-whatsapp-tunggakan*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.notifikasi-whatsapp-tunggakan.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Whatsap Tunggakan</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/notifikasi-whatsapp-tanggungan*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.notifikasi-whatsapp-tanggungan.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Whatsap Tanggungan</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/log-whatsapp*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.log-whatsapp.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Whatsapp">Log Whatsapp</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/log-aktifitas*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.log-aktifitas.index')}}" class="menu-link">
-                        <div data-i18n="Notifikasi Aktifitas">Log Aktifitas</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Request::is(['admin/utilitas/manajemen-user*'])  ? 'active' : '' }}">
-                    <a href="{{route('admin.utilitas.manajemen-user.index')}}" class="menu-link">
-                        <div data-i18n="Manajemen User">Manajemen User</div>
-                    </a>
-                </li>
-            </ul>
+        <li class="menu-item {{ Request::is(['admin/notifikasi-whatsapp-tunggakan*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.notifikasi-whatsapp-tunggakan.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-alarm-warning-line"></i>
+                <div data-i18n="Notifikasi Whatsapp">Whatsap Tunggakan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/notifikasi-whatsapp-tanggungan*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.notifikasi-whatsapp-tanggungan.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-feedback-line"></i>
+                <div data-i18n="Notifikasi Whatsapp">Whatsap Tanggungan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/log-whatsapp*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.log-whatsapp.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-list-ordered"></i>
+                <div data-i18n="Notifikasi Whatsapp">Log Whatsapp</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/log-aktifitas*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.log-aktifitas.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-list-ordered"></i>
+                <div data-i18n="Notifikasi Aktifitas">Log Aktifitas</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Request::is(['admin/manajemen-user*'])  ? 'active' : '' }}">
+            <a href="{{route('admin.manajemen-user.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons ri ri-admin-line"></i>
+                <div data-i18n="Manajemen User">Manajemen User</div>
+            </a>
         </li>
     </ul>
 </aside>
