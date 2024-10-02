@@ -246,7 +246,7 @@ class NotifikasiWhatsappTagihanController extends Controller
     public function sendWhatsapp(Request $request)
     {
         // dd($request);
-        set_time_limit(300);
+        set_time_limit(500);
         $filters = [];
         $filterQuery = null;
         // $search_arr = $request->get('search');
@@ -352,6 +352,10 @@ class NotifikasiWhatsappTagihanController extends Controller
             "number_key" => "3eF1CHDzjLi35eE2",
         ];
 
+        if ($records->count() >= 100) {
+            return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
+        }
+        set_time_limit(500);
         $log = new LogModel();
         $log->user_id =  auth()->check() ? auth()->user()->id : null;
         $log->menu =  'Whatsapp Tagihan';

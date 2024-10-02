@@ -158,7 +158,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
 
         $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
             ->where('scctbill.FSTSBolehBayar', 1)
-           
+
             ->count();
 
         $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
@@ -254,7 +254,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
     public function sendWhatsapp(Request $request)
     {
         // dd($request);
-        set_time_limit(300);
+        set_time_limit(500);
         $filters = [];
         $filterQuery = null;
         // $search_arr = $request->get('search');
@@ -361,6 +361,9 @@ class NotifikasiWhatsappTanggunganController extends Controller
             "api_key" => "1FOPYD2SA8VPIU4Q",
             "number_key" => "3eF1CHDzjLi35eE2",
         ];
+        if ($records->count() >= 100) {
+            return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
+        }
         $log = new LogModel();
         $log->user_id =  auth()->check() ? auth()->user()->id : null;
         $log->menu =  'Whatsapp Tanggungan';

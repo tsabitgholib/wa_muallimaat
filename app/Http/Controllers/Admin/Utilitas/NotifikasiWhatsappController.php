@@ -149,7 +149,7 @@ class NotifikasiWhatsappController extends Controller
         $unit = $waduh[1];
         $kelas = $request->kelas;
 
-        set_time_limit(300);
+        set_time_limit(500);
         $per = $request->input('per');
         $pesan = $request->input('pesan') ? strip_tags($request->input('pesan')) : '';
         $url = 'https://api.watzap.id/v1/send_message';
@@ -176,6 +176,10 @@ class NotifikasiWhatsappController extends Controller
                 break;
             default:
                 return response()->json(['message' => 'Data tidak valid, silahkan muat ulang halaman'], 422);
+        }
+
+        if ($siswas->count() >= 100) {
+            return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
         }
 
         $payload = [
@@ -213,8 +217,6 @@ class NotifikasiWhatsappController extends Controller
                 usleep($randomDelay);
                 $arrResponse = json_decode($response, true);
                 DB::beginTransaction();
-
-
 
                 LogWhatsappsModel::create([
                     'custid' => $siswa->CUSTID,
