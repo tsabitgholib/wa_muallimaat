@@ -105,7 +105,7 @@ class NotifikasiWhatsappController extends Controller
             'scctcust.DESC02 as kelas',
             'scctcust.DESC03 as kelompok',
             'scctcust.DESC04 as thn_aka',
-            'scctcust.NOCUST as NO_WA',
+            'scctcust.NO_WA as nowa',
             'scctcust.NOCUST as nis',
 
         ]);
