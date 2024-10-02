@@ -8,6 +8,7 @@ use App\Models\MstKelasModel;
 use App\Models\MstThnAkaModel;
 use App\Models\ScctBillModel;
 use App\Models\UAkunModel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 
@@ -72,6 +73,12 @@ class LogWhatsappController extends Controller
             $filters[] = ['status', '=', '200'];
         } else {
             $filters[] = ['status', '!=', '200'];
+        }
+
+        if ($request->dari_tanggal && $request->sampai_tanggal) {
+            $dateEnd =  Carbon::parse($request->sampai_tanggal)->addHours(23, 59, 59);
+            $filters[] = ['log_whatsapps.created_at', '>=', $request->dari_tanggal];
+            $filters[] = ['log_whatsapps.created_at', '<=', $dateEnd];
         }
 
         if (!empty($filters)) {

@@ -3,6 +3,8 @@
     <link rel="stylesheet" href="{{asset('main/vendor/libs/select2/select2.css')}}">
     <link rel="stylesheet" href="{{asset('main/vendor/libs/datatables-bs5/datatables.bootstrap5.css')}}">
     <link rel="stylesheet" href="{{asset('main/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css')}}">
+    <link rel="stylesheet" href="{{asset('main/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css')}}">
+
 @endsection
 @section('content')
     <h3 class="page-heading d-flex text-gray-900 fw-bold flex-column justify-content-center my-0">
@@ -42,23 +44,21 @@
                     <div class="row">
                         <h5>Filter</h5>
                         <div class="col-lg-6">
-
                             <div class="mb-5">
-                                <label class="form-label" for="status_tagihan">
-                                    Status
-                                </label>
-                                <select class="form-select" id="status_tagihan"
-                                        name="status_tagihan"
-                                        data-control="select2"
-                                        data-placeholder="Pilih Status Tagihan">
-                                        <option
-                                        value="1">Berhasil</option>
-                                        <option
-                                        value="2">Gagal</option>
-                                </select>
+                                <div class="row d-flex align-items-center">
+                                    <label class="form-label" for="nama">
+                                        Pilih Tanggal
+                                    </label>
+                                    <div class="col">
+                                        <input type="text" class="form-control" placeholder="Dari Tanggal" name="dari_tanggal" value="" id="dari-tanggal"/>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" class="form-control" placeholder="Sampai Tanggal" name="sampai_tanggal" value="" id="sampai-tanggal"/>
+                                    </div>
+                                    <div class="invalid-feedback" role="alert"></div>
+                                </div>
                             </div>
                         </div>
-
                     </div>
                     <div class="w-100">
                         <div class="row">
@@ -97,6 +97,7 @@
     <script src="{{asset('main/vendor/libs/datatables-bs5/datatables-bootstrap5.js')}}"></script>
     <script src="{{asset('main/vendor/libs/select2/select2.js')}}"></script>
     <script src="{{asset('js/datatableCustom/Datatable0-2.js')}}"></script>
+    <script src="{{asset('main/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js')}}"></script>
 
     <script type="text/javascript">
         let dataColumns = [];
@@ -177,6 +178,16 @@
             }
         }
         document.addEventListener("DOMContentLoaded", function () {
+            $("#dari-tanggal").datepicker({
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                language: 'id'
+            });
+            $("#sampai-tanggal").datepicker({
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                language: 'id'
+            });
 
             $('#unit').change(function() {
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -213,6 +224,14 @@
                 if (formId) {
                     let filterForm = $(`#${formId}`);
                     filterForm.on('submit', function (e) {
+                        var dariTanggal = $('#dari-tanggal').val();
+                        var sampaiTanggal = $('#sampai-tanggal').val();
+                        
+                        if (dariTanggal != '' && sampaiTanggal == '') {
+                            warningAlert("isilah sampai tanggal")
+                        }else if (dariTanggal == '' && sampaiTanggal != '') {
+                            warningAlert("isilah dari tanggal")
+                        }
                         e.preventDefault();
                         dataReFilter(tableId, dataUrl, dataColumns, formId);
                     });

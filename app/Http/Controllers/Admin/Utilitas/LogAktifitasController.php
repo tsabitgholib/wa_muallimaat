@@ -33,12 +33,14 @@ class LogAktifitasController extends Controller
             ['data' => 'menu', 'name' => 'Menu', 'searchable' => true, 'orderable' => true],
             ['data' => 'aksi', 'name' => 'Aktifitas', 'searchable' => true, 'orderable' => true],
             ['data' => 'ip_address', 'name' => 'IP ADDRESS', 'searchable' => true, 'orderable' => true],
-            ['data' => 'created_at', 'name' => 'Tanggal','columnType' => 'timeStamp', 'searchable' => false, 'orderable' => false],
+            ['data' => 'status', 'name' => 'status', 'searchable' => true, 'orderable' => true],
+            ['data' => 'created_at', 'name' => 'Tanggal', 'columnType' => 'timeStamp', 'searchable' => false, 'orderable' => false],
         ];
     }
 
     public function getData(Request $request)
     {
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -68,7 +70,11 @@ class LogAktifitasController extends Controller
 
         $filters = [];
         $filterQuery = null;
-
+        if ($request->dari_tanggal && $request->sampai_tanggal) {
+            $dateEnd =  Carbon::parse($request->sampai_tanggal)->addHours(23, 59, 59);
+            $filters[] = ['log.created_at', '>=', $request->dari_tanggal];
+            $filters[] = ['log.created_at', '<=', $dateEnd];
+        }
         $filter = $request->input('filter');
 
         if (!empty($filters)) {

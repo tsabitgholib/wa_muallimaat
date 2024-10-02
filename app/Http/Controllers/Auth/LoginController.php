@@ -71,8 +71,9 @@ class LoginController extends Controller
 
             ]);
         } else {
+            $user = User::where('username', $request->username)->first();
             LogModel::create([
-                'user_id' => auth()->check() ? auth()->user()->id : null,
+                'user_id' => $user->id,
                 'menu' => 'login',
                 'aksi' => 'login',
                 'target_id' => 'login',
@@ -96,7 +97,7 @@ class LoginController extends Controller
     {
         // Check user role and return the appropriate redirect path
         if (auth()->user()->hasRole('admin')) {
-            return '/admin/utilitas/notifikasi-whatsapp-tagihan';
+            return '/admin/notifikasi-whatsapp-tagihan';
         }
         return '/logout';
     }
