@@ -16,7 +16,7 @@ class Controller extends BaseController
             if (auth()->user()->hasRole('siswa')) {
                 return redirect()->route('siswa.index');
             } else if (auth()->user()->hasRole('admin')) {
-                return redirect()->route('admin.utilitas.notifikasi-whatsapp-tagihan.index');
+                return redirect()->route('admin.notifikasi-whatsapp-tagihan.index');
             }
         }
         return redirect()->route('login');
