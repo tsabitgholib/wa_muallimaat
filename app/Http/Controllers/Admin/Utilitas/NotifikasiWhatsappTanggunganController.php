@@ -49,7 +49,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
     {
         return [
             ['data' => 'no', 'name' => 'no'],
-            ['data' => 'NO', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
+            ['data' => 'NOCUST', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
             ['data' => 'NO_WA', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'PAIDST', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Dibayar', 'falseVal' => 'Belum Dibayar'],
@@ -157,8 +157,8 @@ class NotifikasiWhatsappTanggunganController extends Controller
         }
 
         $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
-            ->where('scctbill.BILLAC', '<=', '' . $tahun . $bulan)
             ->where('scctbill.FSTSBolehBayar', 1)
+           
             ->count();
 
         $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
@@ -180,8 +180,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
             })
             ->count();
 
-        $records =
-            ScctBillModel::orderBy($columnName, $columnSortOrder)
+        $records = ScctBillModel::orderBy($columnName, $columnSortOrder)
             ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
             ->where('scctbill.PAIDST', 0)
             ->where('scctbill.FSTSBolehBayar', 1)
@@ -195,7 +194,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
                 'scctbill.FUrutan',
                 // 'scctbill.KodePost',
                 'scctcust.NMCUST AS nama',
-                'scctcust.NOCUST AS nis',
+                'scctcust.NOCUST',
                 'scctcust.NO_WA'
             ])
             ->whereAny([

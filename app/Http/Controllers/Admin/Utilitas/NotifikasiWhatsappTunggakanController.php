@@ -40,7 +40,7 @@ class NotifikasiWhatsappTunggakanController extends Controller
     public function __construct()
     {
         $this->title = 'Keuangan';
-        $this->mainTitle = 'TunggakanTagihan Siswa';
+        $this->mainTitle = 'Tunggakan Tagihan Siswa';
         $this->dataTitle = 'Data TunggakanTagihan';
         $this->showTitle = 'Detail Data Tunggakan Tagihan';
     }
