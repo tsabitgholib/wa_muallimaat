@@ -385,20 +385,45 @@ class NotifikasiWhatsappTunggakanController extends Controller
         $url = 'https://api.watzap.id/v1/send_message';
         foreach ($records as $siswa) {
             try {
+                // $messages = [
+                //     "Assalamualaikum Wr Wb,
+                //     \nSalam sejahtera bagi kita semua. Kami ingin menginformasikan kepada Anda, orang tua ananda {nama_anak}, untuk tunggakan tagihan anak Anda sebesar {jumlah_tagihan}.
+                //     \nDengan Rincian :{rincian}\nDemikian pesan dari kami. Wassalam 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                //     "Selamat pagi/siang/malam,Bapak/Ibu {nama_orang_tua}. Kami ingin mengingatkan bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah jatuh tempo.
+                //     \nRincian Tagihan :{rincian}\nTerima kasih atas perhatiannya. Salam hormat dari kami 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                //     " *_*Friendly Rimender From " . config('app.nama_instansi') . "_*\n\nPermisi Bapak/Ibu {nama_orang_tua}, berikut ini merupakan pesan pengingat untuk tunggakan tagihan sekolah yang dimiliki ananda {nama_anak} yang berjumlah {jumlah_tagihan}.
+                //     \nDengan Rincian Tagihannya :{rincian}\nKami harap Bapak/Ibu dapat segera melunaskan beban tagihan tersebut. Terimakasih Wassalamualaikum wr wb 🙏.\n\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
+                //     "Dengan hormat, kami sampaikan kepada Bapak/Ibu {nama_orang_tua}, bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah harus dibayarkan.
+                //     \nRincian :{rincian}\nTerima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.\n\n*_pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*"
+                // ];
                 $messages = [
+                    "Assalamu'alaikum Warahmatullahi wabarakatuh
+                    \nKami dari keuangan Ibnu Abbas 
+                    \nMemberitahukan kepada wali santri atas nama {nama_anak} 
+                    \nMasih ada kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
+                    {rincian}
+                    \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
+                    \nJazaakumullah khairan katsiran",
+
+                    "-السلام عليكم ورحمة الله وبركاته-
+                    \n\nKami dari Ibnu Abbas, memberitahukan kepada wali santri atas nama {nama_anak} 
+                    \nAnanda masih memiliki kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
+                    \n\n......\n 
+                    \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
+                    \nJazaakumullah khairan katsiran",
+
+                    "Dengan hormat, kami sampaikan kepada Bapak/Ibu {nama_orang_tua}, bahwa tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah harus dibayarkan.
+                    \nRincian :{rincian}\nTerima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.\n\n*_pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
+
                     "Assalamualaikum Wr Wb,
-                    \nSalam sejahtera bagi kita semua. Kami ingin menginformasikan kepada Anda, orang tua ananda {nama_anak}, untuk tunggakan tagihan anak Anda sebesar {jumlah_tagihan}.
+                    \nSalam sejahtera bagi kita semua. Kami ingin menginformasikan kepada Anda, orang tua ananda {nama_anak}, untuk tagihan anak Anda sebesar {jumlah_tagihan}.
                     \nDengan Rincian :{rincian}\nDemikian pesan dari kami. Wassalam 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
 
-                    "Selamat pagi/siang/malam,Bapak/Ibu {nama_orang_tua}. Kami ingin mengingatkan bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah jatuh tempo.
-                    \nRincian Tagihan :{rincian}\nTerima kasih atas perhatiannya. Salam hormat dari kami 🙏.\n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
-
-                    " *_*Friendly Rimender From " . config('app.nama_instansi') . "_*\n\nPermisi Bapak/Ibu {nama_orang_tua}, berikut ini merupakan pesan pengingat untuk tunggakan tagihan sekolah yang dimiliki ananda {nama_anak} yang berjumlah {jumlah_tagihan}.
-                    \nDengan Rincian Tagihannya :{rincian}\nKami harap Bapak/Ibu dapat segera melunaskan beban tagihan tersebut. Terimakasih Wassalamualaikum wr wb 🙏.\n\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
-
-                    "Dengan hormat, kami sampaikan kepada Bapak/Ibu {nama_orang_tua}, bahwa tunggakan tagihan untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah harus dibayarkan.
-                    \nRincian :{rincian}\nTerima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.\n\n*_pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubingi admin sekolah jika ada kesalahan tagihan atau nama siswa_*"
                 ];
+
                 $randomArray = Arr::random($messages);
 
                 if ($request->status_tagihan == 1) {
