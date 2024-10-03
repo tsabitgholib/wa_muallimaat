@@ -403,7 +403,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                     \n\nKami dari Ibnu Abbas, memberitahukan kepada wali santri atas nama {nama_anak} 
                     \nAnanda masih memiliki kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
                     \n{rincian}
-                    \n\n......\n 
+                    \n......\n 
                     \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
                     \nJazaakumullah khairan katsiran",
 

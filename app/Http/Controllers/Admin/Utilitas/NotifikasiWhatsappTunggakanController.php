@@ -404,14 +404,15 @@ class NotifikasiWhatsappTunggakanController extends Controller
                     \nKami dari keuangan Ibnu Abbas 
                     \nMemberitahukan kepada wali santri atas nama {nama_anak} 
                     \nMasih ada kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
-                    {rincian}
+                    \n{rincian}
                     \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
                     \nJazaakumullah khairan katsiran",
 
                     "-السلام عليكم ورحمة الله وبركاته-
                     \n\nKami dari Ibnu Abbas, memberitahukan kepada wali santri atas nama {nama_anak} 
                     \nAnanda masih memiliki kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
-                    \n\n......\n 
+                    \n{rincian}
+                    \n......\n 
                     \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
                     \nJazaakumullah khairan katsiran",
 
