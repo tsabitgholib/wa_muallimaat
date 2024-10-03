@@ -19,7 +19,7 @@
     <meta name="description" content=""/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{asset('favicon.ico')}}"/>
+    <link rel="icon" type="image/x-icon" href="{{asset('logo.ico')}}"/>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -175,7 +175,7 @@
                                             </div>
                                             <div class="flex-grow-1">
                                                 <span class="fw-medium d-block small">{{config('app.name')}}</span>
-                                                <small class="text-muted">Admin</small>
+                                                <small class="text-muted"> {{Auth::user()->name}} </small>
                                             </div>
                                         </div>
                                     </a>

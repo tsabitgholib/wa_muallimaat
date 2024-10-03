@@ -156,67 +156,74 @@ class NotifikasiWhatsappTunggakanController extends Controller
             };
         }
 
-        $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
-            ->where('scctbill.BILLAC', '<', '' . $tahun . $bulan)
-            ->where('scctbill.FSTSBolehBayar', 1)
-            ->count();
+        if (count($filters) < 2) {
+            $totalRecords = 0;
+            $totalRecordswithFilter = 0;
+            $records = [];
+        } else {
+            $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
+                ->where('scctbill.BILLAC', '<', '' . $tahun . $bulan)
+                ->where('scctbill.FSTSBolehBayar', 1)
+                ->count();
 
-        $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
-            ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
-            ->where('scctbill.PAIDST', 0)
-            ->where('scctbill.FSTSBolehBayar', 1)
-            ->whereAny([
-                'scctcust.NMCUST',
-                'scctcust.NOCUST',
-                'scctcust.DESC02',
-                'scctcust.DESC03',
-                'scctcust.CODE02',
-                'scctcust.NO_WA'
-            ], 'like', '%' . $searchValue . '%')
-            ->where(function ($query) use ($filterQuery) {
-                if ($filterQuery) {
-                    $filterQuery($query);
-                }
-            })
-            ->count();
+            $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
+                ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+                ->where('scctbill.PAIDST', 0)
+                ->where('scctbill.FSTSBolehBayar', 1)
+                ->whereAny([
+                    'scctcust.NMCUST',
+                    'scctcust.NOCUST',
+                    'scctcust.DESC02',
+                    'scctcust.DESC03',
+                    'scctcust.CODE02',
+                    'scctcust.NO_WA'
+                ], 'like', '%' . $searchValue . '%')
+                ->where(function ($query) use ($filterQuery) {
+                    if ($filterQuery) {
+                        $filterQuery($query);
+                    }
+                })
+                ->count();
 
-        $records =
-            ScctBillModel::orderBy($columnName, $columnSortOrder)
-            ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
-            ->where('scctbill.PAIDST', 0)
-            ->where('scctbill.FSTSBolehBayar', 1)
-            ->select([
-                'scctbill.AA',
-                'scctbill.BILLNM',
-                'scctbill.BILLAM',
-                'scctbill.PAIDST',
-                'scctbill.BTA',
-                'scctbill.FIDBANK',
-                'scctbill.FUrutan',
-                // 'scctbill.KodePost',
-                'scctcust.NMCUST AS nama',
-                'scctcust.NOCUST AS nis',
-                'scctcust.NO_WA'
-            ])
-            ->whereAny([
-                'scctcust.NMCUST',
-                'scctcust.NOCUST',
-            ], 'like', '%' . $searchValue . '%')
-            ->where(function ($query) use ($filterQuery) {
-                if ($filterQuery) {
-                    $filterQuery($query);
-                }
-            })
-            ->groupBy($groupBy)
-            ->skip($start)
-            ->take($rowperpage)
-            ->get()
-            ->map(function ($item, $index) {
-                $item->no = $index + 1;
-                $item->item_id = Crypt::encrypt($item->id);
-                unset($item->id);
-                return $item;
-            })->toArray();
+            $records =
+                ScctBillModel::orderBy($columnName, $columnSortOrder)
+                ->leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+                ->where('scctbill.PAIDST', 0)
+                ->where('scctbill.FSTSBolehBayar', 1)
+                ->select([
+                    'scctbill.AA',
+                    'scctbill.BILLNM',
+                    'scctbill.BILLAM',
+                    'scctbill.PAIDST',
+                    'scctbill.BTA',
+                    'scctbill.FIDBANK',
+                    'scctbill.FUrutan',
+                    // 'scctbill.KodePost',
+                    'scctcust.NMCUST AS nama',
+                    'scctcust.NOCUST AS nis',
+                    'scctcust.NO_WA'
+                ])
+                ->whereAny([
+                    'scctcust.NMCUST',
+                    'scctcust.NOCUST',
+                ], 'like', '%' . $searchValue . '%')
+                ->where(function ($query) use ($filterQuery) {
+                    if ($filterQuery) {
+                        $filterQuery($query);
+                    }
+                })
+                ->groupBy($groupBy)
+                ->skip($start)
+                ->take($rowperpage)
+                ->get()
+                ->map(function ($item, $index) {
+                    $item->no = $index + 1;
+                    $item->item_id = Crypt::encrypt($item->id);
+                    unset($item->id);
+                    return $item;
+                })->toArray();
+        }
+
 
         $response = array(
             "draw" => intval($draw),
@@ -300,7 +307,6 @@ class NotifikasiWhatsappTunggakanController extends Controller
                 }
             };
         }
-
 
         if ($request->status_tagihan == 1) {
             $records = ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
