@@ -1,3 +1,4 @@
+
 function debounce(func, delay) {
     let timeout;
     return function (...args) {
@@ -44,16 +45,16 @@ function createColumns(id, columns, location) {
 }
 
 
-function dataTableCreate(id, dataUrl, dataColumns, formId = null) {
+function dataTableCreate(id, dataUrl, dataColumns, formId = null, search = true) {
     let idTable = $(`#${id}`);
     let searchPanel = [];
-    console.log(searchPanel);
     idTable.DataTable({
         autoWidth: false,
         responsive: false,
         scrollX: true,
         columns: dataColumns,
         fixedHeader: false,
+        searching: search,
         columnDefs: [
             {
                 targets: 0,
@@ -92,7 +93,38 @@ function dataTableCreate(id, dataUrl, dataColumns, formId = null) {
         },
         processing: true,
         serverSide: true,
+        preDrawCallback: function (settings) {
+            if (formId) {
+                let submitButton = $(`#${formId} input[type="submit"], #${formId} button[type="submit"]`);
+                let resetButton = $(`#${formId} input[type="reset"], #${formId} button[type="reset"]`);
+
+                if (submitButton.length !== 0) {
+                    submitButton.prop('disabled', true);
+                    submitButton.html(`<span class="spinner-border me-2" role="status" aria-hidden="true"></span>Cari`);
+                }
+                if (resetButton.length !== 0) {
+                    resetButton.prop('disabled', true);
+                    resetButton.html(`<span class="spinner-border me-2" role="status" aria-hidden="true"></span>Cari`);
+                }
+            }
+        },
+        drawCallback: function (settings) {
+            if (formId) {
+                let submitButton = $(`#${formId} input[type="submit"], #${formId} button[type="submit"]`);
+                let resetButton = $(`#${formId} input[type="reset"], #${formId} button[type="reset"]`);
+                if (submitButton.length !== 0) {
+                    submitButton.html(`<span class="ri-search-line me-2"></span>Cari`);
+                    submitButton.prop('disabled', false);
+                }
+                if (resetButton.length !== 0){
+                    resetButton.html(`<span class="ri-reset-left-line me-2"></span>Reset`);
+                    resetButton.prop('disabled', false);
+                }
+            }
+        },
+
         initComplete: function (data) {
+            //// for fixed header only
             // if (window.Helpers.isNavbarFixed()) {
             //     let navHeight = $('#layout-navbar').outerHeight();
             //     new $.fn.dataTable.FixedHeader($(idTable).dataTable()).headerOffset(navHeight);
@@ -127,11 +159,15 @@ function dataReload(id = null) {
     id && $(`#${id}`).DataTable().ajax.reload();
 }
 
-function dataReFilter(id = null) {
+function dataReFilter(id = null, formId = null) {
     id && $(`#${id}`).DataTable().draw();
+    // if (id) {
+    //     const tableId = $(`#${id}`);
+    //     tableId.DataTable().draw();
+    // }
 }
 
-function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead) {
+function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true) {
     $.ajax({
         url: columnUrl,
         success: function (data) {
@@ -254,9 +290,9 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead) {
                                 let falseVal = column.falseVal ?? 'Tidak Dapat Disimpan';
                                 if (data === "1" || data === 1 || data === true) {
                                     return `<span class="badge px-2 rounded-pill bg-label-success">${saveVal}</span>`;
-                                } else if (data === "2" || data === 2){
+                                } else if (data === "2" || data === 2) {
                                     return `<span class="badge px-2 rounded-pill bg-label-warning">${updateVal}</span>`;
-                                }else if (data === "0" || data === 0 || data === false){
+                                } else if (data === "0" || data === 0 || data === false) {
                                     return `<span class="badge px-2 rounded-pill bg-label-danger">${falseVal}</span>`;
                                 }
                             }
@@ -271,7 +307,9 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead) {
                                     '1140004': 'INFAQ',
                                     '1200001': 'Loket Manual - Beasiswa',
                                     '1200002': 'Loket Manual - Potongan',
-                                    null : '',
+                                    '1': 'Transfer Online',
+                                    '4': 'Transfer Online',
+                                    null: '',
                                     '': ''
                                 };
                                 return descriptions[data] || data;
@@ -294,14 +332,14 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead) {
                     orderable: column.orderable ?? false,
                     render: renderFunc ?? false,
                     className: column.className ?? false,
-                    search : false,
+                    search: false,
                 })
             })
             if (thead) {
                 createColumns(id, dataColumns, 'thead');
                 // createColumns(id, dataColumns, 'tfoot');
             }
-            dataTableCreate(id, dataUrl, dataColumns, formId)
+            dataTableCreate(id, dataUrl, dataColumns, formId, search)
         }
     });
 }
