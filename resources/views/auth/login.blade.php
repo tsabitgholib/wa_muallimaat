@@ -28,7 +28,7 @@
                         </div>
                         <div class="row">
                             <div class="col-8">
-                                <h4 class="mb-2">Selamat Datang!</h4>
+                                <h4 class="mb-2">Selamat Datang</h4>
                                 <p class="mb-4">Silahkan login terlebih dahulu</p>
                             </div>
                             <div class="col text-end">
