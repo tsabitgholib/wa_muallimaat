@@ -174,7 +174,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
             $.each(data, function (index, column) {
                 let renderFunc = '';
                 if (column.columnType) {
-                    switch (column.columnType) {
+                    switch (column.columnType.toLowerCase()) {
                         case 'suffix':
                             renderFunc = function (data, type, row) {
                                 if (type === 'display' || type === 'filter') {
@@ -200,7 +200,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
                             };
                             break;
                         case 'date':
-                        case 'dateFormat':
+                        case 'dateformat':
                             renderFunc = function (data, type, row) {
                                 if (type === 'display' || type === 'filter') {
                                     let date = new Date(data);
@@ -215,7 +215,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
                                 return data;
                             };
                             break;
-                        case 'timeStamp':
+                        case 'timestamp':
                             renderFunc = function (data, type, row) {
                                 if (type === 'display' || type === 'filter') {
                                     let date = new Date(data);
@@ -283,7 +283,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
                                       </div>`
                             }
                             break;
-                        case 'importStatus':
+                        case 'importstatus':
                             renderFunc = function (data, type, row) {
                                 let saveVal = column.saveVal ?? 'Dapat Disimpan';
                                 let updateVal = column.updateVal ?? 'Update';
