@@ -82,6 +82,7 @@ class NotifikasiWhatsappController extends Controller
             $nama = null;
         }
 
+
         $whereAny = [
             'scctcust.NUM2ND',
             'scctcust.NOCUST',
@@ -177,6 +178,8 @@ class NotifikasiWhatsappController extends Controller
             default:
                 return response()->json(['message' => 'Data tidak valid, silahkan muat ulang halaman'], 422);
         }
+
+        dd($request);
 
         if ($siswas->count() >= 100) {
             return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);

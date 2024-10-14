@@ -279,7 +279,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
                         case 'checkbox':
                             renderFunc = function (data, type, row) {
                                 return `<div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="">
+                                        <input class="form-check-input input-data" type="checkbox" value="data[${data}]">
                                       </div>`
                             }
                             break;

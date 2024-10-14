@@ -239,15 +239,18 @@
                 if (formId) {
                     let filterForm = $(`#${formId}`);
                     filterForm.on('submit', function (e) {
+                        e.preventDefault();
+
                         var dariTanggal = $('#dari-tanggal').val();
                         var sampaiTanggal = $('#sampai-tanggal').val();
-                        
                         if (dariTanggal != '' && sampaiTanggal == '') {
                             warningAlert("isilah sampai tanggal")
-                        }else if (dariTanggal == '' && sampaiTanggal != '') {
-                            warningAlert("isilah dari tanggal")
+                            return;
                         }
-                        e.preventDefault();
+                        else if (dariTanggal == '' && sampaiTanggal != '') {
+                            warningAlert("isilah dari tanggal")
+                            return;
+                        }
                         dataReFilter(tableId, dataUrl, dataColumns, formId);
                     });
 

@@ -351,7 +351,6 @@
                     url: 'https://cdn.datatables.net/plug-ins/2.0.6/i18n/id.json',
                     emptyTable: "Tidak ada siswa pada Kelas dan Angkatan yang dipilih"
                 },
-
                 paging: true,
                 serverSide: false,
                 searching: false,

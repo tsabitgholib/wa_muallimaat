@@ -48,13 +48,13 @@ class NotifikasiWhatsappTagihanController extends Controller
     public function getColumn()
     {
         return [
+            ['data' => 'nis_checkbox', 'name' => '<input class="form-check-input check-all" type="checkbox" value="">', 'columnType' => 'checkbox', 'className' => 'text-end'],
             ['data' => 'no', 'name' => 'no'],
             ['data' => 'nis', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
             ['data' => 'NO_WA', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'PAIDST', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Dibayar', 'falseVal' => 'Belum Dibayar'],
             ['data' => 'BTA', 'name' => 'Tahun AKA', 'searchable' => true, 'orderable' => true],
-
             // ['data' => 'nama_post', 'name' => 'Nama POST', 'searchable' => true, 'orderable' => true],
             ['data' => 'BILLNM', 'name' => 'Nama Tagihan', 'searchable' => true, 'orderable' => true],
             ['data' => 'BILLAM', 'name' => 'Tagihan', 'searchable' => true, 'orderable' => true, 'columnType' => 'currency', 'className' => 'text-end'],
@@ -87,7 +87,7 @@ class NotifikasiWhatsappTagihanController extends Controller
 
         if ($request->has('order')) {
             $columnIndex_arr = $request->get('order');
-            $columnIndex = $columnIndex_arr[0]['column'];
+            $columnIndex = $columnIndex_arr[0]['column'] == 0 && $defaultColumn;
             $columnSortOrder = $columnIndex_arr[0]['dir'];
         } else {
             $columnIndex = $defaultColumn;
@@ -211,6 +211,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                 ->map(function ($item, $index) {
                     $item->no = $index + 1;
                     $item->item_id = Crypt::encrypt($item->id);
+                    $item->nis_checkbox = $item->nis;
                     unset($item->id);
                     return $item;
                 })->toArray();

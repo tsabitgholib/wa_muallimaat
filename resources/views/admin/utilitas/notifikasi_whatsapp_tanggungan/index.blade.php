@@ -339,11 +339,16 @@
             });
 
             if (dataUrl && columnUrl) {
-                getDT(tableId, columnUrl, dataUrl, dataColumns, formId, true);
+                getDT(tableId, columnUrl, dataUrl, dataColumns, formId, true, false);
                 if (formId) {
                     let filterForm = $(`#${formId}`);
                     filterForm.on('submit', function (e) {
                         e.preventDefault();
+                        let kelas = $('#index-kelas').val();
+                        if (kelas == '' || kelas == null) {
+                            warningAlert("Silahkan isi filter kelas terlebih dahulu");
+                            return;
+                        }
                         dataReFilter(tableId, dataUrl, dataColumns, formId);
                     });
 

@@ -32,6 +32,7 @@ class LogWhatsappController extends Controller
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
             ['data' => 'no_wa', 'name' => 'Nomor WhatsApp', 'searchable' => true, 'orderable' => true],
             ['data' => 'status', 'name' => 'Status', 'orderable' => true, 'columnType' => 'boolean', 'trueVal' => 'Berhasil', 'falseVal' => 'Gagal'],
+            ['data' => 'created_at', 'name' => 'Tanggal', 'columnType' => 'timeStamp', 'searchable' => false, 'orderable' => false],
             ['data' => 'pesan', 'name' => 'Pesan', 'searchable' => true, 'orderable' => true],
         ];
     }
@@ -110,7 +111,6 @@ class LogWhatsappController extends Controller
                 }
             })
             ->count();
-
         $records = LogWhatsappsModel::leftJoin('users', 'users.id', 'log_whatsapps.user_id')
             ->orderBy($columnName, $columnSortOrder)
             ->select([
@@ -119,6 +119,7 @@ class LogWhatsappController extends Controller
                 'log_whatsapps.id',
                 'log_whatsapps.pesan',
                 'log_whatsapps.status',
+                'log_whatsapps.created_at',
                 'users.name as nama_admin',
             ])
             ->whereAny([
@@ -142,7 +143,6 @@ class LogWhatsappController extends Controller
                 unset($item->id);
                 return $item;
             })->toArray();
-
 
         $response = array(
             "draw" => intval($draw),
