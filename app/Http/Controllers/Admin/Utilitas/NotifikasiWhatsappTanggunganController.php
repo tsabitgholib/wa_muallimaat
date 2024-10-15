@@ -17,6 +17,7 @@ use App\Models\no;
 use App\Models\scctbill;
 use App\Models\ScctBillDetailModel;
 use App\Models\ScctBillModel;
+use App\Models\ScctcustModel;
 use App\Models\UAkunModel;
 use App\Models\ValidationMessage;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -25,6 +26,7 @@ use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -50,6 +52,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
     public function getColumn()
     {
         return [
+            ['data' => 'id', 'name' => 'no', 'columnType' => 'checkbox', 'selectName' => 'scctbill', 'preData' => '', 'selectClass' => 'scctbill'],
             ['data' => 'no', 'name' => 'no'],
             ['data' => 'NOCUST', 'name' => 'NIS', 'searchable' => true, 'orderable' => true],
             ['data' => 'nama', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true],
@@ -163,9 +166,14 @@ class NotifikasiWhatsappTanggunganController extends Controller
             $totalRecordswithFilter = 0;
             $records = [];
         } else {
-            $totalRecords = ScctBillModel::select('count(*) as allcount')->where('scctbill.PAIDST', 0)
+            $totalRecords = ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
+                ->select('count(*) as allcount')->where('scctbill.PAIDST', 0)
                 ->where('scctbill.FSTSBolehBayar', 1)
-
+                ->where(function ($query) use ($filterQuery) {
+                    if ($filterQuery) {
+                        $filterQuery($query);
+                    }
+                })
                 ->count();
 
             $totalRecordswithFilter = ScctBillModel::select('count(*) as allcount')
@@ -192,12 +200,13 @@ class NotifikasiWhatsappTanggunganController extends Controller
                 ->where('scctbill.PAIDST', 0)
                 ->where('scctbill.FSTSBolehBayar', 1)
                 ->select([
-                    'scctbill.AA',
+                    'scctbill.AA as id',
                     'scctbill.BILLNM',
                     'scctbill.BILLAM',
                     'scctbill.PAIDST',
                     'scctbill.BTA',
                     'scctbill.FIDBANK',
+                    'scctbill.CUSTID',
                     'scctbill.FUrutan',
                     // 'scctbill.KodePost',
                     'scctcust.NMCUST AS nama',
@@ -219,8 +228,6 @@ class NotifikasiWhatsappTanggunganController extends Controller
                 ->get()
                 ->map(function ($item, $index) {
                     $item->no = $index + 1;
-                    $item->item_id = Crypt::encrypt($item->id);
-                    unset($item->id);
                     return $item;
                 })->toArray();
         }
@@ -260,186 +267,86 @@ class NotifikasiWhatsappTanggunganController extends Controller
 
     public function sendWhatsapp(Request $request)
     {
-        // dd($request);
         set_time_limit(500);
-        $filters = [];
-        $filterQuery = null;
-        // $search_arr = $request->get('search');
-        // $searchValue = $search_arr['value'];
-        $filter = $request->input('filter');
 
-        if ($filter) {
-            // dd($filter);
-            foreach ($filter as $key => $val) {
-                if (strtolower($val) != 'all' && $val !== null && $val !== '') {
-                    $colName = match ($key) {
-                        'tahun_akademik' => 'scctbill.BTA',
-                        'cari_siswa' => is_numeric($val) ? 'scctcust.NOCUST' : 'scctcust.NMCUST',
-                        default => null
-                    };
-
-                    ($colName) && $filters[] =  $colName == 'scctcust.NMCUST' || 'mst_siswas.nis' ?  [$colName, 'LIKE', "%" . $val . "%"] : [$colName, '=', $val];
-                }
-            };
+        $tagihan = $request->tagihan;
+        if ($tagihan == null) {
+            return response()->json(['error' => true, 'message' => 'tidak ada data yang dipiih'], 422);
         }
-        if (isset($request->unit)) {
-            $waduh = explode('-', $request->unit);
-            $jenjang = $waduh[0];
-            $unit = $waduh[1];
-            $kelas = $request->kelas;
-            $filters[] = ['scctcust.DESC02', '=', $jenjang];
-            $filters[] = ['scctcust.CODE02', '=', $unit];
-            $filters[] = ['scctcust.DESC03', '=', $kelas];
-        }
-        $tahun = Carbon::now()->year;
-        $bulan = Carbon::now()->format('m');
-        $filters[] = ['scctbill.BILLAC', '<=', '' . $tahun . $bulan];
-
-        if (!empty($filters)) {
-            $filterQuery = function ($query) use ($filters) {
-                foreach ($filters as $filter) {
-                    if (count($filter) === 3) {
-                        $query->where($filter[0], $filter[1], $filter[2]);
-                    } elseif (count($filter) === 4) {
-                        $query->{$filter[3]}($filter[0], $filter[1], $filter[2]);
-                    }
-                }
-            };
-        }
-
-
-        if ($request->status_tagihan == 1) {
-            $records = ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
-                ->where('scctbill.PAIDST', 0)
-                ->where('scctbill.FSTSBolehBayar', 1)
-                ->whereNotNull('scctcust.NO_WA')
-                ->select([
-                    'scctbill.AA',
-                    'scctbill.BILLNM',
-                    // 'scctbill.BILLAM',
-                    DB::raw('SUM(scctbill.BILLAM) as BILLAM'),
-                    'scctbill.PAIDST',
-                    'scctbill.BTA',
-                    'scctbill.FIDBANK',
-                    'scctbill.FUrutan',
-                    'scctcust.NMCUST',
-                    'scctcust.NOCUST',
-                    'scctcust.CUSTID',
-                    'scctcust.NO_WA',
-                ])
-                ->where(function ($query) use ($filterQuery) {
-                    if ($filterQuery) {
-                        $filterQuery($query);
-                    }
-                })
-                ->groupBy('scctcust.CUSTID')
-                ->get();
-            if ($records->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
-        } else {
-            $records =
-                ScctBillModel::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
-                ->where('scctbill.PAIDST', 0)
-                ->where('scctbill.FSTSBolehBayar', 1)
-                ->whereNotNull('scctcust.NO_WA')
-                ->select([
-                    'scctbill.AA',
-                    'scctbill.BILLNM',
-                    'scctbill.BILLAM',
-                    'scctbill.PAIDST',
-                    'scctbill.BTA',
-                    'scctbill.FIDBANK',
-                    'scctbill.FUrutan',
-                    'scctcust.NMCUST',
-                    'scctcust.NOCUST',
-                    'scctcust.NO_WA',
-                    'scctcust.CUSTID',
-                ])
-                ->where(function ($query) use ($filterQuery) {
-                    if ($filterQuery) {
-                        $filterQuery($query);
-                    }
-                })
-                ->groupBy('scctbill.CUSTID')
-                ->orderBy('scctbill.FUrutan', 'desc')
-                ->get();
-            if ($records->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
-        };
+        $idSiswaKeys = array_keys($request->tagihan);
+        $siswa = ScctcustModel::whereIn('CUSTID', $idSiswaKeys)->select('CUSTID', 'NO_WA', 'NMCUST', 'NOCUST', 'GENUS')->get();
         $payload = [
             "api_key" => "1FOPYD2SA8VPIU4Q",
             "number_key" => "3eF1CHDzjLi35eE2",
         ];
-        if ($records->count() >= 100) {
+
+        if ($siswa->count() >= 100) {
             return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
         }
         $log = new LogModel();
-        $log->user_id =  auth()->check() ? auth()->user()->id : null;
+        $log->user_id =  Auth::user()->id;
         $log->menu =  'Whatsapp Tanggungan';
         $log->aksi =  'Kirim Whatsapp Tanggungan';
         $log->client_info =  $request->server('HTTP_USER_AGENT');
         $log->target_id =  'Kirim Whatsapp Tanggungan';
         $log->ip_address =   $request->ip();
-        $log->status =  'kirim whatsapp';
+        $log->status =  "kirim whatsapp";
         $log->save();
 
+        $idLog = $log->id;
+
         $url = 'https://api.watzap.id/v1/send_message';
-        foreach ($records as $siswa) {
+        foreach ($siswa as $siswas) {
             try {
+
                 $messages = Messages::wa("Tanggungan");
                 $randomArray = Arr::random($messages);
 
-                if ($request->status_tagihan == 1) {
-                    $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
-                        ->where('BILLAC', '<=', '' . $tahun . $bulan)
-                        ->where('scctbill.FSTSBolehBayar', 1)
-                        ->where('PAIDST', 0)
-                        ->get();
-                } else {
-                    $rincian = ScctBillModel::where('CUSTID', $siswa->CUSTID)
-                        ->where('PAIDST', 0)
-                        ->where('scctbill.FSTSBolehBayar', 1)
-                        ->where('BILLAC', '<=', '' . $tahun . $bulan)
-                        ->groupBy('scctbill.CUSTID')
-                        ->orderBy('scctbill.FUrutan', 'desc')
-                        ->get();
-                }
+                $id_tagihan_array = $tagihan[$siswas->CUSTID];
+
+                $rincian = ScctBillModel::where('CUSTID', $siswas->CUSTID)
+                    ->whereIn('AA', $id_tagihan_array)
+                    ->where('PAIDST', 0)
+                    ->where('scctbill.FSTSBolehBayar', 1)
+                    ->get();
+
+                $totaltagihan = $rincian->sum('BILLAM');
+
                 $rincianString = "\n";
                 foreach ($rincian as $item) {
                     $rincianString .= "- " . $item->BILLNM . ": Rp *" . number_format($item->BILLAM, 0, ',', '.') . "*\n";
                 }
-                $jumlah_tagihan = 'Rp *' . number_format((int)$siswa->BILLAM, 0, ',', '.') . '*';
+                $jumlah_tagihan = 'Rp *' . number_format((int)$totaltagihan, 0, ',', '.') . '*';
                 $message = str_replace(
                     ['{nama_anak}', '{nama_orang_tua}', '{jumlah_tagihan}', '{rincian}'],
-                    [$siswa->NMCUST ?? '', $siswa->GENUS, $jumlah_tagihan, $rincianString],
+                    [$siswas->NMCUST ?? '', $siswas->GENUS, $jumlah_tagihan, $rincianString],
                     $randomArray
                 );
 
-                $payload['phone_no'] = $siswa->NO_WA;
+                $payload['phone_no'] = $siswas->NO_WA;
                 $payload['message'] = $message;
-
-                // $payload['target'] = $siswa->custid;
-                // $payload['description'] = $message;
-
                 $jsonPayload = json_encode($payload);
-                // dd($jsonPayload);
-
                 $response = Http::withBody($jsonPayload, 'application/json')->post($url);
                 Log::error('Wa Response: ' . $response);
 
                 $randomDelay = rand(1100000, 3200000);
+                usleep($randomDelay);
+
                 $arrResponse = json_decode($response, true);
                 DB::beginTransaction();
+
                 LogWhatsappsModel::create([
-                    'custid' => $siswa->CUSTID,
-                    'user_id' => auth()->check() ? auth()->user()->id : null,
-                    'log_id' => $log->id,
+                    'custid' => $siswas->CUSTID,
+                    'log_id' => $idLog,
+                    'user_id' => Auth::id(),
                     'status' => $arrResponse['status'],
-                    'no_wa' => $siswa->NO_WA,
+                    'no_wa' => $siswas->NO_WA,
                     'pesan' => $message,
-                    'nama' => $siswa->NMCUST,
+                    'nama' => $siswas->NMCUST,
                     'response' => $response
                 ]);
+
                 DB::commit();
-                usleep($randomDelay);
             } catch (Exception $e) {
                 DB::rollBack();
                 Log::channel('whatsapp')->error('Payment failed', [

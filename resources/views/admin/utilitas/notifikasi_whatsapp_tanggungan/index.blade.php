@@ -2,7 +2,16 @@
 @section('style')
     <link rel="stylesheet" href="{{asset('main/vendor/libs/select2/select2.css')}}">
     <link rel="stylesheet" href="{{asset('main/vendor/libs/datatables-bs5/datatables.bootstrap5.css')}}">
+    
     <link rel="stylesheet" href="{{asset('main/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css')}}">
+    <style>
+        table.dataTable tr.selected {
+            border-top: 2px solid var(--bs-primary);
+            border-bottom: 2px solid var(--bs-primary);
+            border-left: none;
+            border-right: none;
+        }
+    </style>
 @endsection
 @section('content')
     <h3 class="page-heading d-flex text-gray-900 fw-bold flex-column justify-content-center my-0">
@@ -30,153 +39,147 @@
     </ul>
 
     <div class="card">
-    @csrf
-        <div class="card-header bg-card sticky-element">
-            <div class="row mb-3">
-                <h5 class="mb-0 me-2">{{($dataTitle??$mainTitle)}}</h5>
+        @csrf
+        <form id="filterForm">
+            <div class="card-header bg-card sticky-element">
+                <div class="row mb-3">
+                    <h5 class="mb-0 me-2">{{($dataTitle??$mainTitle)}}</h5>
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <form id="filterForm">
-                <fieldset class="form-fieldset">
-                    <div class="row">
-                        <h5>Kirim Berdasarkan</h5>
-                        <div class="col-lg-6">
-                            <div class="mb-5">
-                                <label class="form-label" for="cari_siswa">
-                                    Nis / Nama
-                                </label>
-                                <input class="form-control" id="cari_siswa" name="filter[cari_siswa]" placeholder="Nis / Nama">
-                            </div>
-                            {{-- <div class="mb-5">
-                                <label class="form-label" for="kelas">
-                                    Kelas
-                                </label>
-                                <select class="form-select" id="kelas" name="filter[kelas]"
-                                        data-control="select2" data-placeholder="Pilih Kelas">
-                                    <option value="all">Semua</option>
-                                    @isset($kelas)
-                                        @foreach($kelas as $item)
-                                            <option
-                                                value="{{$item->id}}">{{$item->unit}}  -  {{$item->kelas}} {{$item->kelompok}}</option>
-                                        @endforeach
-                                    @else
-                                        <option>data kosong</option>
-                                    @endisset
-                                </select>
-                            </div> --}}
+            <div class="card-body">
+                <div class="row px-5 mb-2">
+                    <ul class="list-group list-group-timeline">
+                        <li class="list-group-item list-group-timeline-danger">
+                            <strong>Pastikan sudah melengkapi data nomor whatsapp siswa!!</strong>
+                        </li>
+                        <li class="list-group-item list-group-timeline-danger">
+                            <strong>Siswa tanpa data nomor whatsapp, tidak akan menerima pesan ini!</strong>
+                        </li>
+                    </ul>
+                </div>
+                    <fieldset class="form-fieldset">
+                        <div class="row">
+                            <h5>Kirim Berdasarkan</h5>
+                            <div class="col-lg-6">
+                                <div class="mb-5">
+                                    <label class="form-label" for="cari_siswa">
+                                        Nis / Nama
+                                    </label>
+                                    <input class="form-control" id="cari_siswa" name="filter[cari_siswa]" placeholder="Nis / Nama">
+                                </div>
+                                <div class="mb-5">
+                                        <label class="form-label" for="kelas">
+                                            Kelas
+                                        </label>
+                                        <div class="row">
+                                            <div class="col">
+                                                <select class="form-select" id="unit" name="unit"
+                                                        data-control="select2"
+                                                        data-placeholder="Pilih Jenis Unit">
+                                                    <option></option>
+                                                    @isset($kelas)
+                                                        @foreach ($kelas as $k)
+                                                            <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
+                                                        @endforeach
+                                                    @else
+                                                        <option>Tidak Ada Data</option>
+                                                    @endisset
+                                                </select>
+                                            </div>
+                                            <div class="col">
+                                                <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
+                                                        data-placeholder="Pilih Jenis Kelas" disabled>
+                                                </select>
+                                            </div>
+                                        </div>
 
-                            <div class="mb-5">
-                                <label class="form-label" for="kelas">
-                                    Kelas
-                                </label>
-                                <div class="row">
-                                    <div class="col">
-                                        <select class="form-select" id="unit" name="unit"
-                                                data-control="select2"
-                                                data-placeholder="Pilih Jenis Unit">
-                                            <option></option>
-                                            <option>Semua</option>
-                                            @isset($kelas)
-                                                @foreach ($kelas as $k)
-                                                    <option value="{{$k->jenjang}}-{{$k->unit}}">{{$k->jenjang}} {{$k->unit}}</option>
-                                                @endforeach
-                                            @else
-                                                <option>Tidak Ada Data</option>
-                                            @endisset
-                                        </select>
-                                    </div>
-                                    <div class="col">
-                                        <select class="form-select" id="index-kelas" name="kelas" data-control="select2"
-                                                data-placeholder="Pilih Jenis Kelas" disabled>
-                                        </select>
-                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-5">
+                                    <label class="form-label" for="tahun_akademik">
+                                        Tahun Akademik
+                                    </label>
+                                    <select class="form-select" id="tahun_akademik"
+                                            name="filter[tahun_akademik]"
+                                            data-control="select2"
+                                            data-placeholder="Pilih Tahun Akademik">
+                                        <option value="all">Semua</option>
+                                        @isset($thn_aka)
+                                            @foreach($thn_aka as $item)
+                                                <option
+                                                    value="{{$item->thn_aka}}">{{$item->thn_aka}}</option>
+                                            @endforeach
+                                        @else
+                                            <option>data kosong</option>
+                                        @endisset
+                                    </select>
+                                </div>
+                                <div class="mb-5">
+                                    <label class="form-label" for="status_tagihan">
+                                        Status
+                                    </label>
+                                    <select class="form-select" id="status_tagihan"
+                                            name="status_tagihan"
+                                            data-control="select2"
+                                            data-placeholder="Pilih Status Tagihan">
+                                            <option
+                                            value="1">Semua Tagihan</option>
+                                            <option
+                                            value="2">Hanya Tagihan Dengan Urutan Terkecil</option>
+                                    </select>
                                 </div>
                             </div>
 
                         </div>
-                        <div class="col-lg-6">
-                            <div class="mb-5">
-                                <label class="form-label" for="tahun_akademik">
-                                    Tahun Akademik
-                                </label>
-                                <select class="form-select" id="tahun_akademik"
-                                        name="filter[tahun_akademik]"
-                                        data-control="select2"
-                                        data-placeholder="Pilih Tahun Akademik">
-                                    <option value="all">Semua</option>
-                                    @isset($thn_aka)
-                                        @foreach($thn_aka as $item)
-                                            <option
-                                                value="{{$item->thn_aka}}">{{$item->thn_aka}}</option>
-                                        @endforeach
-                                    @else
-                                        <option>data kosong</option>
-                                    @endisset
-                                </select>
-                            </div>
-                            <div class="mb-5">
-                                <label class="form-label" for="status_tagihan">
-                                    Status
-                                </label>
-                                <select class="form-select" id="status_tagihan"
-                                        name="status_tagihan"
-                                        data-control="select2"
-                                        data-placeholder="Pilih Status Tagihan">
-                                        <option
-                                        value="1">Semua Tagihan</option>
-                                        <option
-                                        value="2">Hanya Tagihan Dengan Urutan Terkecil</option>
-                                </select>
+                        <div class="w-100">
+                            <div class="row">
+                                <div class="d-flex justify-content-center justify-content-md-end gap-4">
+                                    <button type="reset" class="btn btn-outline-secondary">
+                                        <span class="tf-icon ri-reset-left-line me-2"></span>
+                                        Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-outline-primary ">
+                                        <span class="tf-icon ri-search-line me-2"></span>
+                                        Cari
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                    </div>
-                    <div class="w-100">
-                        <div class="row">
-                            <div class="d-flex justify-content-center justify-content-md-end gap-4">
-                                <button type="reset" class="btn btn-outline-secondary">
-                                    <span class="tf-icon ri-reset-left-line me-2"></span>
-                                    Reset
-                                </button>
-                                <button type="submit" class="btn btn-outline-primary ">
-                                    <span class="tf-icon ri-search-line me-2"></span>
-                                    Cari
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
-        <div class="card-datatable table-responsive text-nowrap">
-            <table class="table table-sm table-bordered table-hover"
-                id="main_table">
-                <thead class="table-light">
-
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer border-0 pt-0">
-            <div class="d-flex justify-content-end gap-4">
-                <button type="btn" class="btn btn-success" onclick="sendWhatsapp()">
-                    <span class="tf-icon ri-whatsapp-line me-2"></span>
-                    Kirim
-                </button>
+                    </fieldset>
             </div>
-        </div>
+            <div class="card-datatable table-responsive text-nowrap">
+                <table class="table table-sm table-bordered table-hover"
+                    id="main_table">
+                    <thead class="table-light">
+
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 pt-0">
+                <div class="d-flex justify-content-end gap-4">
+                    <button type="btn" class="btn btn-success" onclick="sendWhatsapp()">
+                        <span class="tf-icon ri-whatsapp-line me-2"></span>
+                        Kirim
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
+
 @endsection
 
 @section('script')
-    <meta name="csrf-token" content="{{ csrf_token() }}" xmlns="http://www.w3.org/1999/html">
+
+<meta name="csrf-token" content="{{ csrf_token() }}" xmlns="http://www.w3.org/1999/html">
 
     <script src="{{asset('main/vendor/libs/datatables-bs5/datatables-bootstrap5.js')}}"></script>
     <script src="{{asset('main/vendor/libs/select2/select2.js')}}"></script>
-    <script src="{{asset('js/datatableCustom/Datatable0-2.js')}}"></script>
+    <script src="{{asset('js/datatableCustom/Datatable0-3.js')}}"></script>
 
     <script type="text/javascript">
         let dataColumns = [];
@@ -189,6 +192,7 @@
         const stickyEl = $('.sticky-element');
         let topSpacing;
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
+        let selectedRows = [];
 
         let dtOptions = {
             'tableId': tableId,
@@ -198,7 +202,7 @@
             'formId': formId,
             'thead': true,
             'tfoot': false,
-            'pagination': true,
+            'pagination': false,
             'search': true,
             'fixedHeader': true,
         };
@@ -219,10 +223,11 @@
             errorClass.forEach(element => element.classList.remove('is-invalid'));
         }
 
-        function processErros(errors){
+        function processErros(errors) {
             for (const [key, value] of Object.entries(errors)) {
                 const field = $(`[name=${key}]`);
                 const errorMessage = value[0];
+
                 function applyInvalidClasses(element, container) {
                     element.addClass('is-invalid');
                     container.addClass('is-invalid');
@@ -259,17 +264,18 @@
 
         function sendWhatsapp() {
             loadingAlert('Mengirim pesan <br><span class="text-danger"> *</span>Jangan menutup atau memuat ulang halaman!');
-
             let mainForm = $(this);
             let url = '{{route('admin.notifikasi-whatsapp-tanggungan.send-wa')}}';
             let tipe = 'POST';
             const formId = "filterForm";
-            let data = $('#filterForm').serialize();
+            console.log(selectedRows);
 
             let ajaxOptions = {
                 url: url,
                 type: tipe,
-                data: data,
+                data: {
+                    tagihan: selectedRows
+                },
                 datatype: 'json',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
@@ -278,12 +284,7 @@
             clearErrorMessages(formId)
             $.ajax(ajaxOptions).done(function (responses) {
                 document.getElementById(formId).reset();
-
-                // refreshDataTable();
-                // cardSiswa.addClass('d-none');
-                // cardSiswa.prev().addClass('d-none');
                 successAlert(responses.message)
-                // (responses.message);
             }).fail(function (xhr) {
                 if (xhr.status === 422) {
                     const errMessage = xhr.responseJSON.message
@@ -306,8 +307,8 @@
             })
 
         }
-        document.addEventListener("DOMContentLoaded", function () {
 
+        document.addEventListener("DOMContentLoaded", function () {
             $('#unit').change(function() {
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
                 var selectedValue = $(this).val();
@@ -316,7 +317,7 @@
                     var [jenjang, unit] = selectedValue.split('-');
 
                     $.ajax({
-                        url: "{{route('admin.notifikasi-whatsapp-tunggakan.get-kelas')}}",
+                        url: "{{route('admin.notifikasi-whatsapp-tagihan.get-kelas')}}",
                         type: 'POST',
                         data: {
                             jenjang: jenjang,
@@ -334,12 +335,24 @@
                         }
                     });
                 } else {
-                    $('#kelas-select').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
+                    $('#index-kelas').empty().append('<option value="">Pilih Kelas</option>').prop('disabled', true);
                 }
             });
 
+            let idTable = $(`#${tableId}`);
+
+            if (select2.length) {
+                select2.each(function () {
+                    let $this = $(this);
+                    $this.wrap('<div class="position-relative"></div>').select2({
+                        placeholder: 'Select value',
+                        dropdownParent: $this.parent()
+                    });
+                });
+            }
+
             if (dataUrl && columnUrl) {
-                getDT(tableId, columnUrl, dataUrl, dataColumns, formId, true, false);
+                getDT(tableId, columnUrl, dataUrl, dataColumns, formId, true, false ,true);
                 if (formId) {
                     let filterForm = $(`#${formId}`);
                     filterForm.on('submit', function (e) {
@@ -349,15 +362,17 @@
                             warningAlert("Silahkan isi filter kelas terlebih dahulu");
                             return;
                         }
-                        dataReFilter(tableId, dataUrl, dataColumns, formId);
+                        idTable.DataTable().rows('.selected').deselect();
+                        selectedRows = {};
+                        dataReFilter(tableId);
                     });
 
                     filterForm.on('reset', function (e) {
                         setTimeout(function () {
-                            dataReFilter(tableId, dataUrl, dataColumns, formId);
-
+                            idTable.DataTable().rows('.selected').deselect();
+                            selectedRows = {};
+                            dataReFilter(tableId);
                             const select2InForm = select2.filter(`#${formId} [data-control='select2']`);
-
                             if (select2InForm.length) {
                                 select2InForm.each(function () {
                                     let $this = $(this);
@@ -382,9 +397,32 @@
                     });
                 });
             }
+
+            idTable.on('select.dt', function(e, dt, type, indexes) {
+                let selectedData = idTable.DataTable().table().rows(indexes).data().toArray();
+                selectedData.forEach(row => {
+                    if (!selectedRows[row.CUSTID]) {
+                        selectedRows[row.CUSTID] = [];
+                    }
+                    if (!selectedRows[row.CUSTID].includes(row.id)) {
+                        selectedRows[row.CUSTID].push(row.id);
+                    }
+                });
+            });
+
+            idTable.on('deselect.dt', function(e, dt, type, indexes) {
+                let deselectedData = idTable.DataTable().table().rows(indexes).data().toArray();
+                deselectedData.forEach(row => {
+                    if (selectedRows[row.CUSTID]) {
+                        selectedRows[row.CUSTID] = selectedRows[row.CUSTID].filter(id => id !== row.id);
+                        if (selectedRows[row.CUSTID].length === 0) {
+                            delete selectedRows[row.CUSTID];
+                        }
+                    }
+                });
+            });
         });
 
     </script>
-
     {{-- {!! ($modalLink??'') !!} --}}
 @endsection

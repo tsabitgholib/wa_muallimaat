@@ -184,7 +184,6 @@
                         applyInvalidClasses(field, field);
                     }
                 }
-
                 if (key === 'password') {
                     const confirmField = $(`[name=${key}_confirmation]`);
                     applyInvalidClasses(confirmField, confirmField);
@@ -239,8 +238,8 @@
                 if (formId) {
                     let filterForm = $(`#${formId}`);
                     filterForm.on('submit', function (e) {
+                        
                         e.preventDefault();
-
                         var dariTanggal = $('#dari-tanggal').val();
                         var sampaiTanggal = $('#sampai-tanggal').val();
                         if (dariTanggal != '' && sampaiTanggal == '') {

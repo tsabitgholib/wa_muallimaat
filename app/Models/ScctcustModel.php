@@ -20,7 +20,7 @@ class ScctcustModel extends Model
         'DESC01',
         'CODE02',
         'DESC02',
-        'nowa',
+        'NOWA',
         'CODE03',
         'DESC03',
         'CODE04',

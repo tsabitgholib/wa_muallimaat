@@ -30,7 +30,7 @@ final class Messages
             \nMemberitahukan kepada wali santri atas nama {nama_anak} 
             \nMasih ada kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
             {rincian}
-            \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
+            Mohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
             \nJazaakumullah khairan katsiran.
             \n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubungi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
 
@@ -38,12 +38,13 @@ final class Messages
             \nKami dari Ibnu Abbas, memberitahukan kepada wali santri atas nama {nama_anak} 
             \nAnanda masih memiliki kekurangan pembayaran sebesar {jumlah_tagihan}, dengan rincian :
             {rincian}
-            \nMohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
+            Mohon untuk segera di tunaikan, atas perhatiannya kami sampaikan
             \nJazaakumullah khairan katsiran.
             \n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubungi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
 
             "Dengan hormat, kami sampaikan kepada Bapak/Ibu {nama_orang_tua}, bahwa $message untuk ananda {nama_anak} sebesar {jumlah_tagihan} sudah harus dibayarkan.
-            \nRincian :{rincian}\nTerima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.
+            \nRincian :{rincian}
+            Terima kasih atas perhatian dan kerjasamanya. Wassalam 🙏.
             \n\n*_*pesan otomatis dari " . config('app.nama_instansi') . "_*\n*_*silahkan hubungi admin sekolah jika ada kesalahan tagihan atau nama siswa_*",
 
             "Assalamualaikum Wr Wb,
