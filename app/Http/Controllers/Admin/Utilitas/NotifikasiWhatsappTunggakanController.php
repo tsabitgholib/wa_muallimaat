@@ -293,57 +293,64 @@ class NotifikasiWhatsappTunggakanController extends Controller
         $idLog = $log->id;
 
         $url = 'https://api.watzap.id/v1/send_message';
+        $pesan = "Pesan Whatsapp telah dikirimkan!";
+        $siswaPesan = "";
+
         foreach ($siswa as $siswas) {
             try {
+                if ($siswas->NO_WA != null) {
+                    $messages = Messages::wa("Tunggakan");
+                    $randomArray = Arr::random($messages);
 
-                $messages = Messages::wa("Tunggakan");
-                $randomArray = Arr::random($messages);
+                    $id_tagihan_array = $tagihan[$siswas->CUSTID];
 
-                $id_tagihan_array = $tagihan[$siswas->CUSTID];
+                    $rincian = ScctBillModel::where('CUSTID', $siswas->CUSTID)
+                        ->whereIn('AA', $id_tagihan_array)
+                        ->where('PAIDST', 0)
+                        ->where('scctbill.FSTSBolehBayar', 1)
+                        ->get();
 
-                $rincian = ScctBillModel::where('CUSTID', $siswas->CUSTID)
-                    ->whereIn('AA', $id_tagihan_array)
-                    ->where('PAIDST', 0)
-                    ->where('scctbill.FSTSBolehBayar', 1)
-                    ->get();
+                    $totaltagihan = $rincian->sum('BILLAM');
 
-                $totaltagihan = $rincian->sum('BILLAM');
+                    $rincianString = "\n";
+                    foreach ($rincian as $item) {
+                        $rincianString .= "- " . $item->BILLNM . ": Rp *" . number_format($item->BILLAM, 0, ',', '.') . "*\n";
+                    }
+                    $jumlah_tagihan = 'Rp *' . number_format((int)$totaltagihan, 0, ',', '.') . '*';
+                    $message = str_replace(
+                        ['{nama_anak}', '{nama_orang_tua}', '{jumlah_tagihan}', '{rincian}'],
+                        [$siswas->NMCUST ?? '', $siswas->GENUS, $jumlah_tagihan, $rincianString],
+                        $randomArray
+                    );
 
-                $rincianString = "\n";
-                foreach ($rincian as $item) {
-                    $rincianString .= "- " . $item->BILLNM . ": Rp *" . number_format($item->BILLAM, 0, ',', '.') . "*\n";
+                    $payload['phone_no'] = $siswas->NO_WA;
+                    $payload['message'] = $message;
+                    $jsonPayload = json_encode($payload);
+                    $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+                    Log::error('Wa Response: ' . $response);
+
+                    $randomDelay = rand(1100000, 3200000);
+                    usleep($randomDelay);
+
+                    $arrResponse = json_decode($response, true);
+                    DB::beginTransaction();
+
+                    LogWhatsappsModel::create([
+                        'custid' => $siswas->CUSTID,
+                        'log_id' => $idLog,
+                        'user_id' => Auth::id(),
+                        'status' => $arrResponse['status'],
+                        'no_wa' => $siswas->NO_WA,
+                        'pesan' => $message,
+                        'nama' => $siswas->NMCUST,
+                        'response' => $response
+                    ]);
+
+                    DB::commit();
+                } else {
+                    $siswaPesan .= $siswas->NMCUST . ", ";
+                    $pesan .= " Kecuali " . $siswaPesan;
                 }
-                $jumlah_tagihan = 'Rp *' . number_format((int)$totaltagihan, 0, ',', '.') . '*';
-                $message = str_replace(
-                    ['{nama_anak}', '{nama_orang_tua}', '{jumlah_tagihan}', '{rincian}'],
-                    [$siswas->NMCUST ?? '', $siswas->GENUS, $jumlah_tagihan, $rincianString],
-                    $randomArray
-                );
-
-                $payload['phone_no'] = $siswas->NO_WA;
-                $payload['message'] = $message;
-                $jsonPayload = json_encode($payload);
-                $response = Http::withBody($jsonPayload, 'application/json')->post($url);
-                Log::error('Wa Response: ' . $response);
-
-                $randomDelay = rand(1100000, 3200000);
-                usleep($randomDelay);
-
-                $arrResponse = json_decode($response, true);
-                DB::beginTransaction();
-
-                LogWhatsappsModel::create([
-                    'custid' => $siswas->CUSTID,
-                    'log_id' => $idLog,
-                    'user_id' => Auth::id(),
-                    'status' => $arrResponse['status'],
-                    'no_wa' => $siswas->NO_WA,
-                    'pesan' => $message,
-                    'nama' => $siswas->NMCUST,
-                    'response' => $response
-                ]);
-
-                DB::commit();
             } catch (Exception $e) {
                 DB::rollBack();
                 Log::channel('whatsapp')->error('Payment failed', [
@@ -355,7 +362,6 @@ class NotifikasiWhatsappTunggakanController extends Controller
             //untuk mengecek sesuai furutan atau tidak
 
         }
-
-        return response()->json(['message' => 'Pesan Whatsapp telah dikirimkan!']);
+        return response()->json(['message' => $pesan]);
     }
 }

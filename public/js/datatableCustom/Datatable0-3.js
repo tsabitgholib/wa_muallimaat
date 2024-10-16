@@ -247,7 +247,7 @@ function getDT(id, columnUrl, dataUrl, dataColumns, formId, thead, search = true
                                     let iconStyle = column.buttonIcon ? `<i class="${column.buttonIcon}"></i>` : column.buttonIconSVG ? column.buttonIconSVG : '';
                                     let buttonText = column.noCaption ? '' : column.buttonText;
                                     let buttonTitle = column.buttonText ?? '';
-                                    let rowDataJson = JSON.stringify(row);
+                                    let rowDataJson = JSON.stringify(row).replace(/'/g, "&#39;") .replace(/"/g, "&quot;");
                                     switch (column.button) {
                                         case 'modal':
                                             return `
