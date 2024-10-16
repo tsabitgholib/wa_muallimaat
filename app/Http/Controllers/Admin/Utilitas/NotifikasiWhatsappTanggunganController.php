@@ -331,30 +331,36 @@ class NotifikasiWhatsappTanggunganController extends Controller
                     $payload['message'] = $message;
                     $jsonPayload = json_encode($payload);
                     $response = Http::withBody($jsonPayload, 'application/json')->post($url);
-                    Log::error('Wa Response: ' . $response);
+                    // Log::error('Wa Response: ' . $response);
 
                     $randomDelay = rand(1100000, 3200000);
                     usleep($randomDelay);
 
                     $arrResponse = json_decode($response, true);
-                    DB::beginTransaction();
-
-                    LogWhatsappsModel::create([
-                        'custid' => $siswas->CUSTID,
-                        'log_id' => $idLog,
-                        'user_id' => Auth::id(),
-                        'status' => $arrResponse['status'],
-                        'no_wa' => $siswas->NO_WA,
-                        'pesan' => $message,
-                        'nama' => $siswas->NMCUST,
-                        'response' => $response
-                    ]);
-
-                    DB::commit();
+                    $status = $arrResponse['status'];
+                    $wa = $siswas->NO_WA;
                 } else {
+                    $status = "404";
+                    $wa = "-";
+                    $message = "Tidak Dapat Mengirim Pesan!, Silahkan Cek Kembali Nomor WA";
+                    $response = "Gagal Mengirim Pesam";
+
                     $siswaPesan .= $siswas->NMCUST . ", ";
                     $pesan .= " Kecuali " . $siswaPesan;
                 }
+
+                DB::beginTransaction();
+                LogWhatsappsModel::create([
+                    'custid' => $siswas->CUSTID,
+                    'log_id' => $idLog,
+                    'user_id' => Auth::id(),
+                    'status' => $status,
+                    'no_wa' => $wa,
+                    'pesan' => $message,
+                    'nama' => $siswas->NMCUST,
+                    'response' => $response
+                ]);
+                DB::commit();
             } catch (Exception $e) {
                 DB::rollBack();
                 Log::channel('whatsapp')->error('Payment failed', [

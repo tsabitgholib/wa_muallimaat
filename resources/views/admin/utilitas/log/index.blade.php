@@ -66,6 +66,8 @@
                                         data-control="select2"
                                         data-placeholder="Pilih Status Tagihan">
                                         <option
+                                        value="0">Semua</option>
+                                        <option
                                         value="1">Berhasil</option>
                                         <option
                                         value="2">Gagal</option>

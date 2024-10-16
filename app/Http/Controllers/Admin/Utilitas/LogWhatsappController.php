@@ -73,6 +73,8 @@ class LogWhatsappController extends Controller
 
         if ($request->status_tagihan == 1) {
             $filters[] = ['status', '=', '200'];
+        } elseif ($request->status_tagihan == 0) {
+            $filters[] = [];
         } else {
             $filters[] = ['status', '!=', '200'];
         }
@@ -143,6 +145,7 @@ class LogWhatsappController extends Controller
                 unset($item->id);
                 return $item;
             })->toArray();
+
 
         $response = array(
             "draw" => intval($draw),
