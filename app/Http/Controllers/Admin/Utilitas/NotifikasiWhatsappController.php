@@ -14,6 +14,7 @@ use App\Models\ScctcustModel;
 use App\Models\UAkunModel;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -156,7 +157,7 @@ class NotifikasiWhatsappController extends Controller
         $url = 'https://api.watzap.id/v1/send_message';
         switch ($per) {
             case 'id_thn_aka':
-                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->where('DESC04', $request->id_thn_aka)->whereNotNull('NO_WA')->get();
+                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->where('DESC04', $request->id_thn_aka)->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di angkatan ini'], 422);
                 break;
             case 'kelas':
@@ -164,22 +165,19 @@ class NotifikasiWhatsappController extends Controller
                     ->where('DESC03', $kelas)
                     ->where('DESC02', $jenjang)
                     ->where('CODE02', $unit)
-                    ->whereNotNull('NO_WA')
                     ->select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')
                     ->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Tidak ada siswa di kelas ini'], 422);
                 break;
             case 'siswa':
                 if (!$request->input('siswa')) return response()->json(['message' => 'Siswa tidak ditemukan'], 422);
-                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->whereIn('NOCUST', $request->input('siswa'))->whereNotNull('NO_WA')->get();
+                $siswas = ScctcustModel::select('CUSTID', 'NMCUST', 'NOCUST', 'NO_WA')->whereIn('NOCUST', $request->input('siswa'))->get();
                 if ($siswas->isEmpty()) return response()->json(['message' => 'Siswa tidak ditemukan'], 422);
                 if (count($request->input('siswa')) != $siswas->count()) return response()->json(['message' => 'Jumlah siswa yang dipilih tidak sesuai dengan jumlah data, silahkan muat ulang halaman!'], 422);
                 break;
             default:
                 return response()->json(['message' => 'Data tidak valid, silahkan muat ulang halaman'], 422);
         }
-
-        dd($request);
 
         if ($siswas->count() >= 100) {
             return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
@@ -206,29 +204,44 @@ class NotifikasiWhatsappController extends Controller
         $log->ip_address =   $request->ip();
         $log->status =  "kirim whatsapp";
         $log->save();
+
+        $pesanAtah = "Pesan Whatsapp telah dikirimkan!";
+        $siswaPesan = "";
         foreach ($siswas as $siswa) {
 
             try {
-                $payload['phone_no'] = $siswa->NO_WA;
-                $payload['message'] = $pesan;
+                if ($siswas->NO_WA != null) {
+                    $payload['phone_no'] = $siswa->NO_WA;
+                    $payload['message'] = $pesan;
 
-                $jsonPayload = json_encode($payload);
-                $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+                    $jsonPayload = json_encode($payload);
+                    $response = Http::withBody($jsonPayload, 'application/json')->post($url);
 
-                Log::error('Wa Response: ' . $response);
-                $randomDelay = rand(1100000, 3200000);
-                usleep($randomDelay);
-                $arrResponse = json_decode($response, true);
+                    Log::error('Wa Response: ' . $response);
+                    $randomDelay = rand(1100000, 3200000);
+                    usleep($randomDelay);
+                    $arrResponse = json_decode($response, true);
+                    $status = $arrResponse['status'];
+                    $wa = $siswas->NO_WA;
+                } else {
+                    $status = "404";
+                    $wa = "-";
+                    $pesan = "Tidak Dapat Mengirim Pesan!, Silahkan Cek Kembali Nomor WA";
+                    $response = "Gagal Mengirim Pesam";
+
+                    $siswaPesan .= $siswas->NMCUST . ", ";
+                    $pesanAtah .= " Kecuali " . $siswaPesan;
+                }
+
                 DB::beginTransaction();
-
                 LogWhatsappsModel::create([
-                    'custid' => $siswa->CUSTID,
-                    'user_id' => auth()->check() ? auth()->user()->id : null,
+                    'custid' => $siswas->CUSTID,
                     'log_id' => $log->id,
-                    'status' => $arrResponse['status'],
-                    'no_wa' => $siswa->NO_WA,
+                    'user_id' => Auth::id(),
+                    'status' => $status,
+                    'no_wa' => $wa,
                     'pesan' => $pesan,
-                    'nama' => $siswa->NMCUST,
+                    'nama' => $siswas->NMCUST,
                     'response' => $response
                 ]);
                 DB::commit();
