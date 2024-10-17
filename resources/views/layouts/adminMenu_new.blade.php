@@ -11,7 +11,7 @@
                   <img width="50" height="50" src="{{asset('logo.png')}}" alt="logo">
                 </span>
               </span>
-            <span class="app-brand-text demo menu-text fw-bold ms-2">Wa Ibbas</span>
+            <span class="app-brand-text demo menu-text fw-bold ms-2"> {{config('app.nama_instansi')}} </span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
