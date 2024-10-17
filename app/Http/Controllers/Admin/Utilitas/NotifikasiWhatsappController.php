@@ -208,9 +208,8 @@ class NotifikasiWhatsappController extends Controller
         $pesanAtah = "Pesan Whatsapp telah dikirimkan!";
         $siswaPesan = "";
         foreach ($siswas as $siswa) {
-
             try {
-                if ($siswas->NO_WA != null) {
+                if ($siswa->NO_WA != null) {
                     $payload['phone_no'] = $siswa->NO_WA;
                     $payload['message'] = $pesan;
 
@@ -222,26 +221,26 @@ class NotifikasiWhatsappController extends Controller
                     usleep($randomDelay);
                     $arrResponse = json_decode($response, true);
                     $status = $arrResponse['status'];
-                    $wa = $siswas->NO_WA;
+                    $wa = $siswa->NO_WA;
                 } else {
                     $status = "404";
                     $wa = "-";
                     $pesan = "Tidak Dapat Mengirim Pesan!, Silahkan Cek Kembali Nomor WA";
                     $response = "Gagal Mengirim Pesam";
 
-                    $siswaPesan .= $siswas->NMCUST . ", ";
+                    $siswaPesan .= $siswa->NMCUST . ", ";
                     $pesanAtah .= " Kecuali " . $siswaPesan;
                 }
 
                 DB::beginTransaction();
                 LogWhatsappsModel::create([
-                    'custid' => $siswas->CUSTID,
+                    'custid' => $siswa->CUSTID,
                     'log_id' => $log->id,
                     'user_id' => Auth::id(),
                     'status' => $status,
                     'no_wa' => $wa,
                     'pesan' => $pesan,
-                    'nama' => $siswas->NMCUST,
+                    'nama' => $siswa->NMCUST,
                     'response' => $response
                 ]);
                 DB::commit();

@@ -306,9 +306,14 @@
             });
 
             $(createForm).on('click', '.button_cari_cari', function (e) {
+                let kelas = $('#index-kelas').val();
+                if (kelas == '' || kelas == null) {
+                    e.preventDefault();
+                    warningAlert("Silahkan isi filter kelas terlebih dahulu");
+                    return;
+                }
                 let per = $('#per').val()
                 let angkatan = $('#id_thn_aka').val()
-                let kelas = $('#index-kelas').val()
                 let unit = $('#unit').val()
                 let cariSiswa = $('#cari_siswa').val()
                 console.log(per)
