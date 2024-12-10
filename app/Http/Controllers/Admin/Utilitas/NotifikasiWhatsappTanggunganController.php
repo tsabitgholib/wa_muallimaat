@@ -277,7 +277,7 @@ class NotifikasiWhatsappTanggunganController extends Controller
         $siswa = ScctcustModel::whereIn('CUSTID', $idSiswaKeys)->select('CUSTID', 'NO_WA', 'NMCUST', 'NOCUST', 'GENUS')->get();
         $payload = [
             "api_key" => "1FOPYD2SA8VPIU4Q",
-            "number_key" => "3eF1CHDzjLi35eE2",
+            "number_key" => "M9nZbbae9W6ddsGs",
         ];
 
         if ($siswa->count() >= 100) {

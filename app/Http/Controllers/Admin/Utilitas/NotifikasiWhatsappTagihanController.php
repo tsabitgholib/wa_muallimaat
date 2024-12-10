@@ -263,7 +263,7 @@ class NotifikasiWhatsappTagihanController extends Controller
         $siswa = ScctcustModel::whereIn('CUSTID', $idSiswaKeys)->select('CUSTID', 'NO_WA', 'NMCUST', 'NOCUST', 'GENUS')->get();
         $payload = [
             "api_key" => "1FOPYD2SA8VPIU4Q",
-            "number_key" => "3eF1CHDzjLi35eE2",
+            "number_key" => "M9nZbbae9W6ddsGs",
         ];
 
         if ($siswa->count() >= 100) {
@@ -284,6 +284,7 @@ class NotifikasiWhatsappTagihanController extends Controller
         $url = 'https://api.watzap.id/v1/send_message';
         $pesan = "Pesan Whatsapp telah dikirimkan!";
         $siswaPesan = "";
+
         foreach ($siswa as $siswas) {
             try {
                 if ($siswas->NO_WA != null) {
@@ -333,7 +334,7 @@ class NotifikasiWhatsappTagihanController extends Controller
                     $siswaPesan .= $siswas->NMCUST . ", ";
                     $pesan .= " Kecuali " . $siswaPesan;
                 }
-                
+
                 DB::beginTransaction();
                 LogWhatsappsModel::create([
                     'custid' => $siswas->CUSTID,

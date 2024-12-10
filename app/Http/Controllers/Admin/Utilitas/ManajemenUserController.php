@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Utilitas;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogModel;
 use App\Models\master_data\mst_kelas;
 use App\Models\master_data\mst_thn_aka;
 use App\Models\MstThnAkaModel;
@@ -193,13 +194,31 @@ class ManajemenUserController extends Controller
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
             ]);
+            $log = new LogModel();
+            $log->user_id =  auth()->check() ? auth()->user()->id : null;
+            $log->menu =  'Manajemen User';
+            $log->aksi =  'Buat User Baru ' . $request->nama;
+            $log->client_info =  $request->server('HTTP_USER_AGENT');
+            $log->target_id =  'Buat User ' . $request->nama;
+            $log->ip_address =   $request->ip();
+            $log->status =  "Berhasil Membuar User " . $request->nama;
+            $log->save();
             $user->syncRoles('admin');
 
             DB::commit();
             return response()->json(['message' => 'Sukses, data Admin telah disimpan '], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal, data Admin gagal disimpan', 'error' => $e], 422);
+            $log = new LogModel();
+            $log->user_id =  auth()->check() ? auth()->user()->id : null;
+            $log->menu =  'Manajemen User';
+            $log->aksi =  'Gagal Membuat User Baru ' . $request->nama;
+            $log->client_info =  $request->server('HTTP_USER_AGENT');
+            $log->target_id =  'Gagal Membuat User ' . $request->nama;
+            $log->ip_address =   $request->ip();
+            $log->status =  "error " . $e->getMessage();
+            $log->save();
+            return response()->json(['message' => 'Gagal, data Admin gagal disimpan', 'error' => $e->getMessage()], 422);
         }
     }
     public function update($id, Request $request)
@@ -224,7 +243,9 @@ class ManajemenUserController extends Controller
                     }
                 },
             ],
-            // 'role' => ['required'],
+            'email' => [
+                'unique:users,email,' . $decryptedId,
+            ],
 
         ];
         if ($request->password != null) {
@@ -246,14 +267,46 @@ class ManajemenUserController extends Controller
             if ($request->password) {
                 $user->password =  bcrypt($request->password);
             }
+
             $user->save();
             // $user->syncRoles($request->role);
 
+            if ($request->password) {
+                $log = new LogModel();
+                $log->user_id =  auth()->check() ? auth()->user()->id : null;
+                $log->menu =  'Manajemen User';
+                $log->aksi =  'Mengganti Password User ' . $request->nama;
+                $log->client_info =  $request->server('HTTP_USER_AGENT');
+                $log->target_id =  'Mengganti Password User ' . $request->nama;
+                $log->ip_address =   $request->ip();
+                $log->status =  "Berhasil Mengganti Password User " . $request->nama;
+                $log->save();
+            } else {
+                $log = new LogModel();
+                $log->user_id =  auth()->check() ? auth()->user()->id : null;
+                $log->menu =  'Manajemen User';
+                $log->aksi =  'Update Data User ' . $request->nama;
+                $log->client_info =  $request->server('HTTP_USER_AGENT');
+                $log->target_id =  'Update Data User ' . $request->nama;
+                $log->ip_address =   $request->ip();
+                $log->status =  "Berhasil Update Data User " . $request->nama;
+                $log->save();
+            }
             DB::commit();
             return response()->json(['message' => 'Sukses, data User telah disimpan '], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal, data User gagal disimpan', 'error' => $e], 422);
+            $log = new LogModel();
+            $log->user_id =  auth()->check() ? auth()->user()->id : null;
+            $log->menu =  'Manajemen User';
+            $log->aksi =  'Gagal Update User ' . $request->nama;
+            $log->client_info =  $request->server('HTTP_USER_AGENT');
+            $log->target_id =  'Gagal Update User ' . $request->nama;
+            $log->ip_address =   $request->ip();
+            $log->status =  "Error " . $e->getMessage();
+            $log->save();
+
+            return response()->json(['message' => 'Gagal, data User gagal disimpan', 'error' => $e->getMessage()], 422);
         }
     }
     public function destroy($id, Request $request)
@@ -272,12 +325,31 @@ class ManajemenUserController extends Controller
         try {
             DB::beginTransaction();
 
+            $log = new LogModel();
+            $log->user_id =  auth()->check() ? auth()->user()->id : null;
+            $log->menu =  'Manajemen User';
+            $log->aksi =  'Hapus User ' . $data->name;
+            $log->client_info =  $request->server('HTTP_USER_AGENT');
+            $log->target_id =  'Hapus User ' . $data->name;
+            $log->ip_address =   $request->ip();
+            $log->status =  "Berhasil Hapus User " . $data->name;
+            $log->save();
+
             $data->delete();
             DB::commit();
             return response()->json(['message' => $nama . ' telah dihapus']);
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['message' =>  $nama . ' gagal dihapus', 'error' => $e], 422);
+            $log = new LogModel();
+            $log->user_id =  auth()->check() ? auth()->user()->id : null;
+            $log->menu =  'Manajemen User';
+            $log->aksi =  'Gagal Hapus User ' . $data->name;
+            $log->client_info =  $request->server('HTTP_USER_AGENT');
+            $log->target_id =  'Gagal Hapus User ' . $data->name;
+            $log->ip_address =   $request->ip();
+            $log->status =  "Error " . $e->getMessage();
+
+            return response()->json(['message' =>  $nama . ' gagal dihapus', 'error' => $e->getMessage()], 422);
         }
     }
 }
