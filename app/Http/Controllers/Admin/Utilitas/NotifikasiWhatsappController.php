@@ -183,10 +183,10 @@ class NotifikasiWhatsappController extends Controller
             return response()->json(['message' => 'jumlah siswa yang dipilih tidak boleh lebih dari 100'], 413);
         }
 
-        $payload = [
-            'api_key' => '1FOPYD2SA8VPIU4Q',
-            'number_key' => 'M9nZbbae9W6ddsGs',
-        ];
+        // $payload = [
+        //     'api_key' => 'AQAKMFACHE5T2CDI',
+        //     'number_key' => 'k6Hp1h9TSlRuo97c',
+        // ];
         // $payload = [
         //     'username' => config('database.connections.mysql.username'),
         //     'password' => config('database.connections.mysql.password'),
@@ -210,22 +210,76 @@ class NotifikasiWhatsappController extends Controller
         foreach ($siswas as $siswa) {
             try {
                 if ($siswa->NO_WA != null) {
-                    $payload['phone_no'] = $siswa->NO_WA;
-                    $payload['message'] = $pesan;
+                    $NoHP = preg_replace('/[^0-9]/', '', $siswa->NO_WA);
 
-                    $jsonPayload = json_encode($payload);
-                    $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+                    $dbTraffic = new \mysqli("10.99.23.20", "root", "Smartpay1ct", "farrelep_broadcaster");
 
-                    Log::error('Wa Response: ' . $response);
-                    $randomDelay = rand(1100000, 3200000);
-                    usleep($randomDelay);
-                    $arrResponse = json_decode($response, true);
-                    $status = $arrResponse['status'];
-                    $wa = $siswa->NO_WA;
+                    $apiKeyQuery = "SELECT GetWAApiSecret('Yogya_Muallimaat')";
+                    $apiKeyResult = $dbTraffic->query($apiKeyQuery);
+                    
+                    if (!$apiKeyResult) {
+                        throw new Exception("Error in API key query: " . $dbTraffic->error);
+                    }
+                    
+                    $apiKeyRow = $apiKeyResult->fetch_array(MYSQLI_NUM);
+                    
+                    if ($apiKeyRow && isset($apiKeyRow[0])) {
+                        list($hostKey, $clientNumberKey) = explode('|', $apiKeyRow[0], 2);
+                    
+                        $payload = [
+                            'api_key' => $hostKey,
+                            'number_key' => $clientNumberKey,
+                        ];
+                    } else {
+                        throw new Exception("Invalid API");
+                    }
+                    
+                    try{
+                        
+                        $fixPesan = str_replace("'", "", $pesan);
+                        
+                        $payload['phone_no'] = $NoHP;
+                        $payload['message'] = $fixPesan;
+                        
+                        
+
+                        $functionQuery = "SELECT SentWA('Yogya_Muallimaat', '" . $NoHP. "', '" . $payload['number_key'] . "', '" . $fixPesan . "')";
+                        $functionResult = $dbTraffic->query($functionQuery);
+
+                        if (!$functionResult) {
+                            throw new Exception("Error in SELECT function: " . $dbTraffic->error);
+                        }
+
+                        $lastNumber = $functionResult->fetch_row()[0];
+
+                        $jsonPayload = json_encode($payload);
+                        $response = Http::withBody($jsonPayload, 'application/json')->post($url);
+
+                        Log::error('Wa Response: ' . $response);
+                        $randomDelay = rand(1100000, 3200000);
+                        usleep($randomDelay);
+
+                        $arrResponse = json_decode($response, true);
+                        $status = $arrResponse['status'];
+                        $wa = $NoHP;
+
+                        $arrayResponse = json_encode($arrResponse);
+                        $procedureQuery = "CALL GetResp('" . $arrayResponse . "', '" . $status . "', '" . $arrResponse['message'] . "', " . $lastNumber . ")";
+                        $procedureResult = $dbTraffic->query($procedureQuery);
+
+                        if (!$procedureResult) {
+                            throw new Exception("Error in CALL procedure: " . $dbTraffic->error);
+                        }
+                    }
+                    catch (Exception $e) {
+                        throw $e;
+                    } finally {
+                        $dbTraffic->close();
+                    }
                 } else {
                     $status = "404";
                     $wa = "-";
-                    $pesan = "Tidak Dapat Mengirim Pesan!, Silahkan Cek Kembali Nomor WA";
+                    $fixPesan = "Tidak Dapat Mengirim Pesan!, Silahkan Cek Kembali Nomor WA";
                     $response = "Gagal Mengirim Pesam";
 
                     $siswaPesan .= $siswa->NMCUST . ", ";
@@ -239,7 +293,7 @@ class NotifikasiWhatsappController extends Controller
                     'user_id' => Auth::id(),
                     'status' => $status,
                     'no_wa' => $wa,
-                    'pesan' => $pesan,
+                    'pesan' => $fixPesan,
                     'nama' => $siswa->NMCUST,
                     'response' => $response
                 ]);

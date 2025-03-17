@@ -178,6 +178,7 @@
         }
 
         function getSiswa(Per, Angkatan, Kelas, unit, siswa = null) {
+            unit = unit.trim().replace(/\s+/g, '');
             let url = '{{route('admin.notifikasi-whatsapp.get-siswa')}}';
             let ajaxOptions = {
                 url: url,
@@ -194,6 +195,8 @@
                     'X-CSRF-TOKEN': csrfToken,
                 },
             }
+            
+            console.log("Mengirim data ke server:", ajaxOptions.data);
 
             $.ajax(ajaxOptions).done(function (response) {
                 console.log(response.data);
